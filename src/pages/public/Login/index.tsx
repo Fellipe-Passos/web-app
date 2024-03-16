@@ -23,9 +23,6 @@ export default function Login() {
       loginSuccess(data);
       navigate("/view-orders");
     },
-    onError(err) {
-      alert(JSON.stringify(err));
-    },
   });
 
   const err = error as any;
