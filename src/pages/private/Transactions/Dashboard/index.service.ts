@@ -1,0 +1,58 @@
+import { ApiService } from "../../../../config/api/api";
+
+
+interface TransactionsByCustomerReturnType {
+    id: number
+    name: string,
+    negativeBalance: number
+}
+
+export const getTransactionsByCustomer = async (): Promise<TransactionsByCustomerReturnType[] | null | undefined> => {
+    const api = new ApiService();
+
+    return await api.RequestData("GET", "/transactions/customer", {}) as Promise<TransactionsByCustomerReturnType[] | null | undefined>;
+};
+
+export enum TransactionsEnum {
+    CREDIT = "CREDIT",
+    DEBT = "DEBT",
+}
+
+interface ReportTransactionProps {
+    manualInput?: boolean
+    value: number
+    description: string
+    orderId?: number
+    clientId: number
+    type: TransactionsEnum
+}
+
+export const reportTransaction = async (data: ReportTransactionProps) => {
+    const api = new ApiService();
+
+    return await api.RequestData("POST", "/transaction", data) as Promise<TransactionsByCustomerReturnType[] | null | undefined>;
+};
+
+
+interface TransactionsCustomerProps {
+    "id": number,
+    "manualInput": boolean,
+    "value": number,
+    "description": string,
+    "createdAt": string | Date,
+    "orderId": null,
+    "clientId": number,
+    "type": TransactionsEnum
+    "discount": number | null,
+    "finalValue": number | null,
+    "userId": number | null,
+    "user": null | {
+        name: string
+    }
+}
+
+export const getTransactionsCustomer = async (clientId: number | null | undefined): Promise<TransactionsCustomerProps[] | null | undefined> => {
+    const api = new ApiService();
+
+    return await api.RequestData("GET", `/transactions/customer/${clientId}`, {}) as Promise<TransactionsCustomerProps[] | null | undefined>;
+};
