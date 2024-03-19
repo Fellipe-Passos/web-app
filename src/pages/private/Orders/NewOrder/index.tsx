@@ -7,19 +7,20 @@ import { useMutation, useQuery } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { Check, DeviceFloppy, Download, X } from "tabler-icons-react";
 import Tabs from "../../../../components/Tabs";
-import { getOrder } from "../Dashboard/index.service";
 import OrderDataForm from "./components/OrderDataForm";
 import StagesDataForm from "./components/StagesDataForm";
 import { orderSchema, orderSchemaInitialValues } from "./schema";
 import { createOrder, editOrder } from "./services/create-order.service";
 import axios from "axios";
 import baseURL from "../../../../config/api/baseURL";
+import { getOrder } from "../Dashboard/index.service";
 
 export default function NewOrder(): JSX.Element {
   const navigate = useNavigate();
   const { ref, height } = useElementSize();
   const { orderId } = useParams();
   const [loading, setIsLoading] = useState(false);
+
   const { data: orderData } = useQuery(
     "view-order",
     () => getOrder(orderId as string),
