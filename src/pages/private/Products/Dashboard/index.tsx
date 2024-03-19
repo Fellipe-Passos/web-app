@@ -129,14 +129,7 @@ export default function ProductsDashboard() {
   return (
     <Stack style={{ overflow: "hidden" }}>
       <Group justify="space-between">
-        <Button
-          radius={"xl"}
-          leftSection={<UserPlus />}
-          onClick={() => navigate("/add-product")}
-        >
-          Adicionar novo produto ao estoque
-        </Button>
-
+        <div />
         <Tabs
           defaultValue={activeTab}
           onChange={async (e: InventoryEnum) => {
@@ -144,15 +137,27 @@ export default function ProductsDashboard() {
           }}
           tabs={[
             { label: "Insumos", value: InventoryEnum.Inputs },
+            { label: "Individuais (clientes)", value: InventoryEnum.Clients },
             { label: "Matérias-prima", value: InventoryEnum.RawMaterials },
+            { label: "Produtos não-dentais", value: InventoryEnum.NonDental },
           ]}
         />
+        <Button
+          radius={"xl"}
+          leftSection={<UserPlus />}
+          onClick={() => navigate("/add-product")}
+        >
+          Adicionar novo produto ao estoque
+        </Button>
       </Group>
 
       <Table.ScrollContainer minWidth={"100%"}>
         <Table striped>
           <Table.Thead>
             <Table.Tr>
+              {activeTab === InventoryEnum.Clients && (
+                <Table.Th>Cliente</Table.Th>
+              )}
               <Table.Th>Marca</Table.Th>
               <Table.Th>Nome</Table.Th>
               <Table.Th>Preço</Table.Th>
@@ -163,6 +168,9 @@ export default function ProductsDashboard() {
           <Table.Tbody>
             {data?.map((user, index) => (
               <Table.Tr key={index}>
+                {activeTab === InventoryEnum.Clients && (
+                  <Table.Td>{user?.client?.name ?? "-"}</Table.Td>
+                )}
                 <Table.Td>{user?.brand ?? "-"}</Table.Td>
                 <Table.Td style={{ paddingLeft: "1rem" }}>
                   {user?.name ?? "-"}
@@ -180,8 +188,11 @@ export default function ProductsDashboard() {
                         <Pencil />
                       </ActionIcon>
                     </Tooltip>
-                    {activeTab === InventoryEnum.RawMaterials && (
-                      <Tooltip label="Dar baixa">
+                    {[
+                      InventoryEnum.NonDental,
+                      InventoryEnum.RawMaterials,
+                    ]?.includes(activeTab) && (
+                      <Tooltip label="Reportar saída manualmente">
                         <ActionIcon
                           color="green"
                           onClick={() => {

@@ -9,6 +9,9 @@ interface ProductsReturnType {
     brand: string,
     qtd: number
     table: InventoryEnum
+    client?: {
+        name?: string
+    }
 }
 
 interface ListProductsProps {

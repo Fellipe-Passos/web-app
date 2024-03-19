@@ -1,4 +1,5 @@
 import { ApiService } from "../../../../config/api/api";
+import { OrderReturnType } from "../../Orders/NewOrder/services/create-order.service";
 
 
 interface TransactionsByCustomerReturnType {
@@ -56,3 +57,14 @@ export const getTransactionsCustomer = async (clientId: number | null | undefine
 
     return await api.RequestData("GET", `/transactions/customer/${clientId}`, {}) as Promise<TransactionsCustomerProps[] | null | undefined>;
 };
+
+export const getOrdersToSelect = (orders?: any[]) => {
+    if (!orders?.length) return [];
+
+    const obj = orders?.map((order: any) => ({
+        label: `${order?.id} - ${order?.client?.name}, Pac: ${order?.patientName}`,
+        value: order?.id?.toString()
+    }))
+
+    return obj
+}

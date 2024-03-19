@@ -11,15 +11,26 @@ import {
 import { useDebouncedState } from "@mantine/hooks";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate } from "react-router-dom";
-import { Check, Download, Pencil, PigMoney, Search } from "tabler-icons-react";
+import {
+  Check,
+  Download,
+  Pencil,
+  PigMoney,
+  Search,
+  Trash,
+  X,
+} from "tabler-icons-react";
 import Loading from "../../../../components/Loading";
 import Tabs from "../../../../components/Tabs";
 import baseURL from "../../../../config/api/baseURL";
 import { formatCurrency } from "../../../../utils";
-import { listOrdersInProgress } from "./index.service";
+import { DeleteOrder, listOrdersInProgress } from "./index.service";
 import { getStatus, header } from "./utils/table";
+import { UserRoles } from "../../../../types/user";
+import { getUserRole } from "../../../../utils/userToken";
+import { notifications } from "@mantine/notifications";
 
 export default function OrdersDashboard(): JSX.Element {
   const navigate = useNavigate();
@@ -29,6 +40,7 @@ export default function OrdersDashboard(): JSX.Element {
     "IN_PROGRESS" | "WAITING_STEPS" | "FOR_DELIVERY" | "FINALIZED"
   >("IN_PROGRESS");
   const [loading, setIsLoading] = useState(false);
+  const userRole = getUserRole();
 
   const { isFetching: orderDataIsLoading, data: ordersData } = useQuery(
     ["list-orders"],
@@ -58,6 +70,58 @@ export default function OrdersDashboard(): JSX.Element {
       console.error(error);
     }
   };
+
+  const { mutate: deleteOrderMutate, isLoading: deleteOrderIsLoading } =
+    useMutation(DeleteOrder, {
+      onSuccess() {
+        notifications.show({
+          title: "Pedido removido",
+          message:
+            "O pedido e todos os registros relacionados foram removidos com sucesso!",
+          color: "green",
+          icon: <Check />,
+          styles: (theme) => ({
+            root: {
+              backgroundColor: theme.colors.green[0],
+              borderColor: theme.colors.green[6],
+
+              "&::before": { backgroundColor: theme.white },
+            },
+
+            title: { color: theme.colors.green[6] },
+            description: { color: theme.colors.green[6] },
+            closeButton: {
+              color: theme.colors.green[6],
+              "&:hover": { backgroundColor: theme.colors.green[1] },
+            },
+          }),
+        });
+        window.location.reload();
+      },
+      onError(err: any) {
+        notifications.show({
+          title: "Falha ao remover pedido",
+          message: err?.response?.data ?? "",
+          color: "red",
+          icon: <X />,
+          styles: (theme) => ({
+            root: {
+              backgroundColor: theme.colors.red[0],
+              borderColor: theme.colors.red[6],
+
+              "&::before": { backgroundColor: theme.white },
+            },
+
+            title: { color: theme.colors.red[6] },
+            description: { color: theme.colors.red[6] },
+            closeButton: {
+              color: theme.colors.red[6],
+              "&:hover": { backgroundColor: theme.colors.red[1] },
+            },
+          }),
+        });
+      },
+    });
 
   const rows =
     ordersData &&
@@ -121,6 +185,24 @@ export default function OrdersDashboard(): JSX.Element {
                     </ActionIcon>
                   </Tooltip>
                 )}
+              {[UserRoles.Ceo, UserRoles.Root]?.includes(
+                userRole as UserRoles
+              ) && (
+                <Tooltip label="Deletar pedido">
+                  <ActionIcon
+                    color="red"
+                    variant="filled"
+                    radius={"xl"}
+                    size={"md"}
+                    loading={deleteOrderIsLoading}
+                    onClick={() => {
+                      deleteOrderMutate({ orderId: order?.id });
+                    }}
+                  >
+                    <Trash />
+                  </ActionIcon>
+                </Tooltip>
+              )}
             </Group>
           </Table.Td>
         </Table.Tr>

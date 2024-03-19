@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Box,
   Button,
   Group,
   MultiSelect,
@@ -8,14 +9,15 @@ import {
   SimpleGrid,
   Stack,
   Table,
-  Text,
   TextInput,
   Textarea,
 } from "@mantine/core";
+import { UseFormReturnType } from "@mantine/form";
 import { useEffect } from "react";
 import { useQuery } from "react-query";
 import { useParams } from "react-router-dom";
 import { Trash } from "tabler-icons-react";
+import NoData from "../../../../../../components/NoData";
 import { orderSchemaInitialValues } from "../../schema";
 import {
   getClientsToSelect,
@@ -34,7 +36,6 @@ import {
   getServicesToSelect,
   listServices,
 } from "../../services/services.service";
-import { UseFormReturnType } from "@mantine/form";
 
 interface OrderDataFormProps {
   orderData: any;
@@ -289,7 +290,12 @@ export default function OrderDataForm({
               ))}
             </Table.Tbody>
           </Table>
-          {!form.values.services?.length ? <Text>Sem resultados</Text> : null}
+          {!form.values.services?.length ? (
+            <Box h={"24vh"}>
+              <NoData />
+            </Box>
+          ) : null}
+          {}
         </Table.ScrollContainer>
 
         <Table.ScrollContainer minWidth={"100%"} h={"32vh"} mah={"32vh"}>
@@ -326,7 +332,11 @@ export default function OrderDataForm({
               ))}
             </Table.Tbody>
           </Table>
-          {!form.values.services?.length ? <Text>Sem resultados</Text> : null}
+          {!form.values.products?.length ? (
+            <Box h={"24vh"}>
+              <NoData />
+            </Box>
+          ) : null}
         </Table.ScrollContainer>
       </Stack>
     );
