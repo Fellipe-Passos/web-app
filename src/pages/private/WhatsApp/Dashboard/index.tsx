@@ -1,11 +1,18 @@
-import { Badge, Button, Stack, Table } from "@mantine/core";
+import { Badge, Button, Group, Stack, Table } from "@mantine/core";
 import { useMutation, useQuery } from "react-query";
 import { humanizeCellphone } from "../../../../utils";
 import { getLogs, resendMessage } from "./index.service";
+import Tabs from "../../../../components/Tabs";
+import { useEffect, useState } from "react";
 
 export default function WhatsAppDashboard(): JSX.Element {
   const { data } = useQuery("logs", getLogs);
+
+  const [logs, setLogs] = useState<any[] | undefined>(data);
+
   const { mutate, isLoading } = useMutation(resendMessage);
+
+  const [active, setActive] = useState<"EXTERNAL" | "INTERNAL">("EXTERNAL");
 
   const onResendMessage = (
     destinationNumber: number,
@@ -14,8 +21,32 @@ export default function WhatsAppDashboard(): JSX.Element {
     mutate({ destinationNumber, message });
   };
 
+  useEffect(() => {
+    if (active === "EXTERNAL") {
+      const externalLogs = data?.filter((log: any) => log?.type === "EXTERNAL");
+
+      setLogs(externalLogs);
+    }
+
+    if (active === "INTERNAL") {
+      const internalLogs = data?.filter((log: any) => log?.type === "INTERNAL");
+
+      setLogs(internalLogs);
+    }
+  }, [active]);
+
   return (
     <Stack h={"100%"}>
+      <Group justify="center">
+        <Tabs
+          defaultValue={active}
+          tabs={[
+            { label: "Externo", value: "EXTERNAL" },
+            { label: "Interno", value: "INTERNAL" },
+          ]}
+          onChange={(e: "EXTERNAL" | "INTERNAL") => setActive(e)}
+        />
+      </Group>
       <Table.ScrollContainer minWidth={"100%"}>
         <Table striped>
           <Table.Thead>
@@ -31,7 +62,7 @@ export default function WhatsAppDashboard(): JSX.Element {
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {data?.map((log, index) => (
+            {logs?.map((log, index) => (
               <Table.Tr key={index}>
                 <Table.Td>{log?.id ?? "-"}</Table.Td>
                 <Table.Td>
