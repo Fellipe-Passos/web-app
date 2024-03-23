@@ -87,31 +87,11 @@ export async function listOrdersInProgress(
   )) as Promise<any[]>;
 }
 
-export async function getOrder(
-  orderId: string
-): Promise<GetOrderReturnType | null | undefined> {
-  try {
-    const apiUrl = `http://localhost:3000/order/${orderId}`;
+export const getOrder = async (orderId: string): Promise<any> => {
+  const api = new ApiService();
 
-    const response = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      // Handle non-successful responses here
-      throw new Error(`Failed to fetch data: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    return undefined;
-  }
-}
+  return await api.RequestData("GET", `/order/${orderId}`, {});
+};
 
 interface NextStepType {
   orderId: string;
