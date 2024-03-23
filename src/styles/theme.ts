@@ -45,6 +45,9 @@ const theme = createTheme({
                     backgroundColor: theme.colors.main[0],
                     color: "#FFF",
                     textTransform: 'uppercase',
+                },
+                tbody: {
+                    fontSize: '.65rem'
                 }
             })
         }

@@ -75,7 +75,7 @@ export interface GetOrderReturnType {
 }
 
 export async function listOrdersInProgress(
-  type?: "IN_PROGRESS" | "WAITING_STEPS" | "FOR_DELIVERY" | "FINALIZED",
+  type?: "ALL" | "IN_PROGRESS" | "WAITING_STEPS" | "FOR_DELIVERY" | "FINALIZED",
   search?: string
 ): Promise<any[]> {
   const api = new ApiService();

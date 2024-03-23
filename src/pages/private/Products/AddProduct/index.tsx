@@ -14,12 +14,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Check, X } from "tabler-icons-react";
 import { removeCurrencyMask } from "../../../../utils";
 import {
+  InventoryEnum,
   createProduct,
   getProduct,
   inventoryToSelect,
   updateProduct,
 } from "./index.service";
 import { productSchema, productSchemaInitialValues } from "./schema";
+import {
+  getClientsToSelect,
+  listClients,
+} from "../../Orders/NewOrder/services/clients.service";
 
 export default function AddProduct() {
   const navigate = useNavigate();
@@ -27,6 +32,8 @@ export default function AddProduct() {
   const { mutate, isLoading } = useMutation(createProduct);
   const { mutate: updateMutate, isLoading: updateIsLoading } =
     useMutation(updateProduct);
+
+  const { data: clientsData } = useQuery("list-clients", listClients);
 
   useQuery("get-product", () => getProduct(productId as string), {
     enabled: Boolean(productId),
@@ -56,13 +63,17 @@ export default function AddProduct() {
     if (hasErrors) return;
 
     if (!productId) {
-      const dataToSend = {
+      const dataToSend: any = {
         name: form.values.name,
         price: removeCurrencyMask(form.values.price)?.toString(),
         brand: form.values.brand,
         qtd: Number(form.values.qtd),
         table: form.values.table,
       };
+
+      if (form.values.clientId && form.values.table === InventoryEnum.Clients) {
+        dataToSend.clientId = Number(form.values.clientId);
+      }
 
       mutate(dataToSend, {
         onSuccess() {
@@ -114,7 +125,7 @@ export default function AddProduct() {
         },
       });
     } else {
-      const dataToSend = {
+      const dataToSend: any = {
         name: form.values.name,
         price: removeCurrencyMask(form.values.price)?.toString(),
         brand: form.values.brand,
@@ -122,6 +133,10 @@ export default function AddProduct() {
         qtd: Number(form.values.qtd),
         table: form.values.table,
       };
+
+      if (form.values.clientId && form.values.table === InventoryEnum.Clients) {
+        dataToSend.clientId = Number(form.values.clientId);
+      }
 
       updateMutate(dataToSend, {
         onSuccess() {
@@ -179,7 +194,22 @@ export default function AddProduct() {
     <Stack>
       <Box style={{ padding: "1.5rem 2rem" }}>
         <Stack w={"90%"} mt={"4rem"} style={{ gap: "1.5rem" }}>
-          <SimpleGrid cols={5}>
+          <SimpleGrid
+            cols={form.values.table === InventoryEnum.Clients ? 6 : 5}
+          >
+            <Select
+              label="Tabela"
+              data={inventoryToSelect()}
+              {...form.getInputProps("table")}
+            />
+            {form.values.table === InventoryEnum.Clients && (
+              <Select
+                label="Cliente"
+                data={getClientsToSelect(clientsData)}
+                {...form.getInputProps("clientId")}
+              />
+            )}
+
             <TextInput label="Marca" {...form.getInputProps("brand")} />
             <TextInput
               label="Nome do material"
@@ -199,11 +229,6 @@ export default function AddProduct() {
             <TextInput
               label="Quantidade em estoque"
               {...form.getInputProps("qtd")}
-            />
-            <Select
-              label="Tabela"
-              data={inventoryToSelect()}
-              {...form.getInputProps("table")}
             />
           </SimpleGrid>
           <SimpleGrid cols={2} mt={"2rem"}>

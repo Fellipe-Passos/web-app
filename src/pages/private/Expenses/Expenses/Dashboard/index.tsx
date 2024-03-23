@@ -246,9 +246,6 @@ export default function Expenses() {
           ]}
         />
         <Group>
-          <Button variant="light" disabled>
-            Imprimir
-          </Button>
           <Button
             onClick={() => {
               if (activeTab !== ExpenseEnum.EMPLOYEES) {
@@ -453,12 +450,7 @@ export default function Expenses() {
         opened={opened}
         onClose={close}
         centered
-        title={
-          <Group justify="space-between">
-            Histórico de pagamentos
-            <Button disabled>Imprimir</Button>
-          </Group>
-        }
+        title={<Group justify="space-between">Histórico de pagamentos</Group>}
         styles={{
           title: {
             fontWeight: 800,

@@ -308,46 +308,18 @@ function Ranking({ padding }: RankingProps) {
           },
         }}
       >
-        <Paper
-          shadow="xl"
-          h={"50vh"}
-          style={{ borderRadius: "10px", overflow: "hidden" }}
-        >
-          <Box
-            style={{
-              overflow: "auto",
-              paddingBottom: "2rem",
-              "&::-webkit-scrollbar": {
-                width: "0.5rem",
-              },
-              "&::-webkit-scrollbar-track": {
-                background: "transparent",
-              },
-              "&::-webkit-scrollbar-thumb": {
-                background: "#D5D5D5",
-                borderRadius: "30px",
-              },
-            }}
-            mah={"50vh"}
-            h={"50vh"}
-          >
+        {usersProductionData?.orders?.length ? (
+          <Table.ScrollContainer minWidth={"100%"} mah={"50vh"} h={"50vh"}>
             <Table striped>
-              <thead
-                style={{
-                  backgroundColor: "#F0AF2D",
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 10,
-                }}
-              >
-                <tr>
-                  <th>Pedido</th>
-                  <th>Cliente</th>
-                  <th>Descrição</th>
-                  <th>Prazo</th>
-                </tr>
-              </thead>
-              <tbody>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Pedido</Table.Th>
+                  <Table.Th>Cliente</Table.Th>
+                  <Table.Th>Descrição</Table.Th>
+                  <Table.Th>Prazo</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
                 {usersProductionData?.orders?.map(
                   (order: any, index: number) => {
                     const current = new Date();
@@ -383,15 +355,15 @@ function Ranking({ padding }: RankingProps) {
                     }
 
                     return (
-                      <tr key={index}>
-                        <td>{order?.orderId}</td>
-                        <td>{order?.order?.client?.name}</td>
-                        <td>
+                      <Table.Tr key={index}>
+                        <Table.Td>{order?.orderId}</Table.Td>
+                        <Table.Td>{order?.order?.client?.name}</Table.Td>
+                        <Table.Td>
                           {order?.order?.services?.length
                             ? `${order?.order?.services[0]?.amount} ${order?.order?.services[0]?.service?.name}...`
                             : "-"}
-                        </td>
-                        <td>
+                        </Table.Td>
+                        <Table.Td>
                           <Badge
                             color={
                               status === "TODAY"
@@ -407,16 +379,20 @@ function Ranking({ padding }: RankingProps) {
                               timeZone: "UTC",
                             })}
                           </Badge>
-                        </td>
-                      </tr>
+                        </Table.Td>
+                      </Table.Tr>
                     );
                   }
                 )}
-              </tbody>
+              </Table.Tbody>
             </Table>
-            {!usersProductionData?.orders?.length && <NoData />}
+          </Table.ScrollContainer>
+        ) : null}
+        {!usersProductionData?.orders?.length && (
+          <Box mah={"50vh"} h={"50vh"}>
+            <NoData />
           </Box>
-        </Paper>
+        )}
       </Modal>
     </Stack>
   );

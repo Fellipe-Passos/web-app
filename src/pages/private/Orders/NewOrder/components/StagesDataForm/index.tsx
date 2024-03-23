@@ -8,6 +8,8 @@ import {
   Table,
   Text,
   Badge,
+  ActionIcon,
+  Tooltip,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import {
@@ -15,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   PigMoney,
+  Trash,
   X,
 } from "tabler-icons-react";
 import { translateRole } from "../../../../../../utils";
@@ -36,6 +39,7 @@ import { StartOrder } from "../../services/start-step.service";
 import { FinishStep } from "../../services/finish-step.service";
 import { ReopenStep } from "../../services/reopen-step.service";
 import { SendToFinancial } from "../../services/send-to-financial.service";
+import { DeleteStage } from "../../services/delete-stage.service";
 
 interface StepsFormProps {
   orderData: any;
@@ -127,6 +131,7 @@ export default function StagesDataForm({ orderData }: StepsFormProps) {
         });
       },
     });
+
   const { mutate: reopenStepMutate, isLoading: reopenStepIsLoading } =
     useMutation(ReopenStep, {
       onSuccess() {
@@ -208,6 +213,58 @@ export default function StagesDataForm({ orderData }: StepsFormProps) {
       onError(err: any) {
         notifications.show({
           title: "Falha ao reabrir etapa",
+          message: err?.response?.data ?? "",
+          color: "red",
+          icon: <X />,
+          styles: (theme) => ({
+            root: {
+              backgroundColor: theme.colors.red[0],
+              borderColor: theme.colors.red[6],
+
+              "&::before": { backgroundColor: theme.white },
+            },
+
+            title: { color: theme.colors.red[6] },
+            description: { color: theme.colors.red[6] },
+            closeButton: {
+              color: theme.colors.red[6],
+              "&:hover": { backgroundColor: theme.colors.red[1] },
+            },
+          }),
+        });
+      },
+    });
+
+  const { mutate: deleteStageMutate, isLoading: deleteStageIsLoading } =
+    useMutation(DeleteStage, {
+      onSuccess() {
+        notifications.show({
+          title: "Etapa removida",
+          message: "A ação de remover etapa foi concluída com sucesso!",
+          color: "green",
+          icon: <Check />,
+          styles: (theme) => ({
+            root: {
+              backgroundColor: theme.colors.green[0],
+              borderColor: theme.colors.green[6],
+
+              "&::before": { backgroundColor: theme.white },
+            },
+
+            title: { color: theme.colors.green[6] },
+            description: { color: theme.colors.green[6] },
+            closeButton: {
+              color: theme.colors.green[6],
+              "&:hover": { backgroundColor: theme.colors.green[1] },
+            },
+          }),
+        });
+        queryClient.invalidateQueries(["view-order"]);
+        queryClient.invalidateQueries(["user-by-role"]);
+      },
+      onError(err: any) {
+        notifications.show({
+          title: "Falha ao remover etapa",
           message: err?.response?.data ?? "",
           color: "red",
           icon: <X />,
@@ -392,6 +449,24 @@ export default function StagesDataForm({ orderData }: StepsFormProps) {
                     >
                       Reabrir etapa
                     </Button>
+                  )}
+                  {[
+                    UserRoles.Ceo,
+                    UserRoles.Root,
+                    UserRoles.Administration,
+                  ]?.includes(userRole as UserRoles) && (
+                    <Tooltip label="Remover etapa">
+                      <ActionIcon
+                        color="red"
+                        radius="xl"
+                        loading={deleteStageIsLoading}
+                        onClick={() => {
+                          deleteStageMutate(stage?.id);
+                        }}
+                      >
+                        <Trash />
+                      </ActionIcon>
+                    </Tooltip>
                   )}
                 </Group>
               </Table.Td>
