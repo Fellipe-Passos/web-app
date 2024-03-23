@@ -1,5 +1,4 @@
 import { ApiService } from "../../../../config/api/api";
-import { OrderReturnType } from "../../Orders/NewOrder/services/create-order.service";
 
 
 interface TransactionsByCustomerReturnType {
