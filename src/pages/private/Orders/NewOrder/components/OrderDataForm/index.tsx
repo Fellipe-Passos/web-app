@@ -77,7 +77,9 @@ export default function OrderDataForm({
   }, [orderData]);
 
   const { data: clientsData } = useQuery("list-clients", listClients);
-  const { data: materialsData } = useQuery("list-materials", listMaterials);
+  const { data: materialsData } = useQuery("list-materials", () =>
+    listMaterials()
+  );
   const { data: servicesData } = useQuery("list-services", listServices);
 
   const getSelectedService = (value: number) => {

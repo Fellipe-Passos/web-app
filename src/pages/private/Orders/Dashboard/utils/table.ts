@@ -4,6 +4,7 @@ import { translateRole } from "../../../../../utils";
 export const header = [
     "Id",
     "Data",
+    "Atraso",
     "Cliente",
     "Paciente",
     "Valor",

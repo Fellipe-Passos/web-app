@@ -9,10 +9,14 @@ export const productionSchema = Yup.object().shape({
 
     userId: Yup.string()
         .nullable(),
+
+    role: Yup.string()
+        .nullable(),
 });
 
 export const productionSchemaInitialValues = {
     startDate: '',
     finalDate: '',
-    userId: undefined
+    userId: undefined,
+    role: undefined
 }

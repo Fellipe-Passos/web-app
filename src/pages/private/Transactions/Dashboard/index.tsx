@@ -31,7 +31,11 @@ import { notifications } from "@mantine/notifications";
 import Loading from "../../../../components/Loading";
 import NoData from "../../../../components/NoData";
 import { UserRoles } from "../../../../types/user";
-import { formatCurrency, removeCurrencyMask } from "../../../../utils";
+import {
+  formatCurrency,
+  removeCPFMask,
+  removeCurrencyMask,
+} from "../../../../utils";
 import { getUserRole } from "../../../../utils/userToken";
 import {
   getClientsToSelect,
@@ -124,9 +128,11 @@ export default function TransactionsDashboard(): JSX.Element {
 
     if (dueDate) dataToSend.dueDate = dueDate;
 
-    if (installmentCount) dataToSend.installmentCount = installmentCount;
+    if (installmentCount)
+      dataToSend.installmentCount = removeCPFMask(installmentCount);
 
-    if (installmentValue) dataToSend.installmentValue = installmentValue;
+    if (installmentValue)
+      dataToSend.installmentValue = removeCurrencyMask(installmentValue);
 
     mutate(dataToSend, {
       onSuccess() {
@@ -428,18 +434,12 @@ export default function TransactionsDashboard(): JSX.Element {
     if (modalInfos?.type === "REPORT") return modalInfos?.title ?? "";
 
     if (modalInfos?.type === "LIST")
-      return (
-        <Group justify="space-between">
-          {modalInfos?.title ?? ""}
-          <Button>Imprimir</Button>
-        </Group>
-      );
+      return <Group justify="space-between">{modalInfos?.title ?? ""}</Group>;
   };
 
   return (
     <Stack h="100%">
       <Group justify="flex-end">
-        <Button variant="light">Imprimir</Button>
         <Button
           radius={"xl"}
           leftSection={<ReportMoney />}
