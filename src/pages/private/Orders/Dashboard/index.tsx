@@ -30,8 +30,13 @@ import baseURL from "../../../../config/api/baseURL";
 import { UserRoles } from "../../../../types/user";
 import { formatCurrency } from "../../../../utils";
 import { getUserRole } from "../../../../utils/userToken";
-import { DeleteOrder, listOrdersInProgress } from "./index.service";
+import {
+  DeleteOrder,
+  FinishOrder,
+  listOrdersInProgress,
+} from "./index.service";
 import { getStatus, header } from "./utils/table";
+import { SendToFinancial } from "../NewOrder/services/send-to-financial.service";
 
 function diffDays(date1: Date, date2: Date): number {
   if (date1.getTime() < date2.getTime()) {
@@ -89,8 +94,72 @@ export default function OrdersDashboard(): JSX.Element {
 
   const { isFetching: orderDataIsLoading, data: ordersData } = useQuery(
     ["list-orders"],
-    () => listOrdersInProgress(activeTab)
+    () =>
+      listOrdersInProgress(
+        activeTab as
+          | "IN_PROGRESS"
+          | "WAITING_STEPS"
+          | "FOR_DELIVERY"
+          | "FINALIZED"
+          | undefined
+      )
   );
+
+  const { mutate: finishOrderMutate, isLoading: finishOrderIsLoading } =
+    useMutation(FinishOrder);
+
+  const { mutate: sendToFinancialMutate, isLoading: sendToFinancialIsLoading } =
+    useMutation(SendToFinancial, {
+      onSuccess() {
+        notifications.show({
+          title: "Pedido enviado para o setor financeiro",
+          message:
+            "A ação de enviar pedido para setor financeiro foi concluída com sucesso!",
+          color: "green",
+          icon: <Check />,
+          styles: (theme) => ({
+            root: {
+              backgroundColor: theme.colors.green[0],
+              borderColor: theme.colors.green[6],
+
+              "&::before": { backgroundColor: theme.white },
+            },
+
+            title: { color: theme.colors.green[6] },
+            description: { color: theme.colors.green[6] },
+            closeButton: {
+              color: theme.colors.green[6],
+              "&:hover": { backgroundColor: theme.colors.green[1] },
+            },
+          }),
+        });
+        queryClient.invalidateQueries(["view-order"]);
+        queryClient.invalidateQueries(["user-by-role"]);
+      },
+      onError(err: any) {
+        notifications.show({
+          title: "Falha ao reabrir etapa",
+          message: err?.response?.data ?? "",
+          color: "red",
+          icon: <X />,
+          styles: (theme) => ({
+            root: {
+              backgroundColor: theme.colors.red[0],
+              borderColor: theme.colors.red[6],
+
+              "&::before": { backgroundColor: theme.white },
+            },
+
+            title: { color: theme.colors.red[6] },
+            description: { color: theme.colors.red[6] },
+            closeButton: {
+              color: theme.colors.red[6],
+              "&:hover": { backgroundColor: theme.colors.red[1] },
+            },
+          }),
+        });
+      },
+    });
 
   const emitForm = async (orderId: number) => {
     try {
@@ -231,6 +300,10 @@ export default function OrdersDashboard(): JSX.Element {
                   <ActionIcon
                     disabled={badge?.text !== "Liberar para financeiro"}
                     color="teal"
+                    onClick={() => {
+                      sendToFinancialMutate({ orderId: Number(order?.id) });
+                    }}
+                    loading={sendToFinancialIsLoading}
                   >
                     <PigMoney />
                   </ActionIcon>
@@ -239,7 +312,20 @@ export default function OrdersDashboard(): JSX.Element {
               {badge?.text === "Aguardando pagamento" &&
                 activeTab === "FOR_DELIVERY" && (
                   <Tooltip label="Finalizar pedido">
-                    <ActionIcon color="yellow">
+                    <ActionIcon
+                      color="yellow"
+                      onClick={() =>
+                        finishOrderMutate(
+                          { orderId: Number(order?.id) },
+                          {
+                            onSuccess() {
+                              window.location.reload();
+                            },
+                          }
+                        )
+                      }
+                      loading={finishOrderIsLoading}
+                    >
                       <Check />
                     </ActionIcon>
                   </Tooltip>
@@ -276,7 +362,14 @@ export default function OrdersDashboard(): JSX.Element {
 
   const onClearSearch = async () => {
     await queryClient.fetchQuery("list-orders", () =>
-      listOrdersInProgress(activeTab)
+      listOrdersInProgress(
+        activeTab as
+          | "IN_PROGRESS"
+          | "WAITING_STEPS"
+          | "FOR_DELIVERY"
+          | "FINALIZED"
+          | undefined
+      )
     );
   };
 
@@ -316,7 +409,14 @@ export default function OrdersDashboard(): JSX.Element {
             ) => {
               setActiveTab(e);
               await queryClient.fetchQuery("list-orders", () =>
-                listOrdersInProgress(e)
+                listOrdersInProgress(
+                  e as
+                    | "IN_PROGRESS"
+                    | "WAITING_STEPS"
+                    | "FOR_DELIVERY"
+                    | "FINALIZED"
+                    | undefined
+                )
               );
             }}
           />
