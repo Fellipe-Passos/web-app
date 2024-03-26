@@ -1,9 +1,12 @@
 import {
   Box,
   Button,
+  Checkbox,
   Grid,
+  Group,
   NumberInput,
   Paper,
+  Radio,
   SimpleGrid,
   Stack,
   TextInput,
@@ -55,6 +58,12 @@ export default function AddClient() {
           zip: data?.zip,
           CPF: data?.CPF,
           email: data?.email,
+          clientType: data?.CPF
+            ? data?.CPF?.length === 11
+              ? "PF"
+              : "PJ"
+            : "PF",
+          orderCollection: Boolean(data?.orderCollection),
         });
       }
     },
@@ -68,6 +77,7 @@ export default function AddClient() {
     if (!clientId) {
       const dataToSend = {
         name: form.values.name,
+        orderCollection: Boolean(form.values.orderCollection),
         phone: `55${removeCPFMask(form.values.phone)}`,
         cro: form.values.cro,
         city: form.values.city,
@@ -133,6 +143,7 @@ export default function AddClient() {
     } else {
       const dataToSend = {
         name: form.values.name,
+        orderCollection: Boolean(form.values.orderCollection),
         phone: `55${removeCPFMask(form.values.phone)}`,
         cro: form.values.cro,
         city: form.values.city,
@@ -249,9 +260,14 @@ export default function AddClient() {
   return (
     <Stack>
       <Box style={{ padding: "1.5rem 2rem" }}>
-        <Stack w={"60%"} mt={"4rem"} style={{ gap: "1.5rem" }}>
+        <Stack w={"90%"} mt={"4rem"} style={{ gap: "1.5rem" }}>
           <Paper shadow="xl" p="2rem" radius={"lg"}>
-            <SimpleGrid cols={3}>
+            <Checkbox
+              label="Cobrança de pedidos"
+              description='Ao desmarcar a opção "Cobrança de pedidos", os pedidos do cliente NÃO serão contabilizados na apuração financeira.'
+              {...form.getInputProps("orderCollection", { type: "checkbox" })}
+            />
+            <SimpleGrid cols={3} mt="1rem">
               <TextInput
                 label="Nome completo"
                 {...form.getInputProps("name")}
@@ -265,11 +281,24 @@ export default function AddClient() {
                 {...form.getInputProps("phone")}
               />
             </SimpleGrid>
-            <SimpleGrid cols={2}>
+            <SimpleGrid cols={3}>
+              <Radio.Group
+                label="Tipo de cliente"
+                {...form.getInputProps("clientType")}
+              >
+                <Group>
+                  <Radio label="Pessoa física" value="PF" />
+                  <Radio label="Pessoa jurídica" value="PJ" />
+                </Group>
+              </Radio.Group>
               <PatternFormat
-                format="###.###.###-##"
+                format={
+                  form.values?.clientType === "PF"
+                    ? "###.###.###-##"
+                    : "##.###.###/####-##"
+                }
                 customInput={TextInput}
-                label="CPF"
+                label={form.values?.clientType === "PF" ? "CPF" : "CNPJ"}
                 mask={"_"}
                 {...form.getInputProps("CPF")}
               />

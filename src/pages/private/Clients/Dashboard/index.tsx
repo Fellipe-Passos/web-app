@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Badge,
   Button,
   Group,
   Stack,
@@ -14,7 +15,11 @@ import { Pencil, Search, Trash, UserPlus } from "tabler-icons-react";
 
 import NoData from "../../../../components/NoData";
 import { UserRoles } from "../../../../types/user";
-import { humanizeCellphone } from "../../../../utils";
+import {
+  humanizeCNPJ,
+  humanizeCPF,
+  humanizeCellphone,
+} from "../../../../utils";
 import { getUserRole } from "../../../../utils/userToken";
 import { listClients } from "./index.service";
 
@@ -65,37 +70,62 @@ export default function ClientsDashboard() {
               <Table.Th>Id Cliente</Table.Th>
               <Table.Th>Nome</Table.Th>
               <Table.Th>Telefone</Table.Th>
+              <Table.Th>CPF/CNPJ</Table.Th>
+              <Table.Th>Id ASAAS</Table.Th>
+              <Table.Th>Cobrança de pedidos</Table.Th>
               <Table.Th>Ações</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {data?.map((user, index) => (
-              <Table.Tr key={index}>
-                <Table.Td>{user?.id ?? "-"}</Table.Td>
-                <Table.Td>{user?.name ?? "-"}</Table.Td>
-                <Table.Td>
-                  {humanizeCellphone(user?.phone?.replace("5582", "829"))}
-                </Table.Td>
-                <Table.Td>
-                  <Group>
-                    <Tooltip label="Editar">
-                      <ActionIcon
-                        color="blue"
-                        radius={"xl"}
-                        onClick={() => navigate(`/edit-client/${user?.id}`)}
-                      >
-                        <Pencil />
-                      </ActionIcon>
-                    </Tooltip>
-                    <Tooltip label="Excluir">
-                      <ActionIcon>
-                        <Trash />
-                      </ActionIcon>
-                    </Tooltip>
-                  </Group>
-                </Table.Td>
-              </Table.Tr>
-            ))}
+            {data?.map((user, index) => {
+              let document = "-";
+
+              if (user?.CPF) {
+                if (user?.CPF?.length === 11) {
+                  document = humanizeCPF(user?.CPF);
+                } else {
+                  humanizeCNPJ(user?.CPF);
+                }
+              }
+
+              return (
+                <Table.Tr key={index}>
+                  <Table.Td>{user?.id ?? "-"}</Table.Td>
+                  <Table.Td>{user?.name ?? "-"}</Table.Td>
+                  <Table.Td>
+                    {humanizeCellphone(user?.phone?.replace("5582", "829"))}
+                  </Table.Td>
+                  <Table.Td>{document}</Table.Td>
+                  <Table.Td>{user?.asaasCustomerId ?? "-"}</Table.Td>
+                  <Table.Td>
+                    <Badge
+                      color={user?.orderCollection ? "teal" : "red"}
+                      variant="light"
+                    >
+                      {user?.orderCollection ? "Sim" : "Não"}
+                    </Badge>
+                  </Table.Td>
+                  <Table.Td>
+                    <Group>
+                      <Tooltip label="Editar">
+                        <ActionIcon
+                          color="blue"
+                          radius={"xl"}
+                          onClick={() => navigate(`/edit-client/${user?.id}`)}
+                        >
+                          <Pencil />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Excluir">
+                        <ActionIcon>
+                          <Trash />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Group>
+                  </Table.Td>
+                </Table.Tr>
+              );
+            })}
           </Table.Tbody>
         </Table>
       </Table.ScrollContainer>

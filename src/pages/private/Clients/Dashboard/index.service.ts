@@ -4,6 +4,9 @@ interface Client {
     id: number;
     name: string;
     phone: string;
+    asaasCustomerId?: string
+    CPF: string
+    orderCollection: boolean
 }
 
 export async function listClients(search?: string): Promise<Client[] | null | undefined> {
