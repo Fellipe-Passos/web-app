@@ -189,11 +189,11 @@ export default function TransactionsDashboard(): JSX.Element {
     });
   };
 
-  const filteredOrders = ordersData?.filter(
+  const filteredOrders = ordersData?.orders?.filter(
     (order: any) => Number(order?.client?.id) === Number(form.values.clientId)
   );
 
-  const currentOrder = ordersData?.find(
+  const currentOrder = ordersData?.orders?.find(
     (order: any) => Number(order?.id) === Number(form.values?.orderId)
   );
 
@@ -202,6 +202,17 @@ export default function TransactionsDashboard(): JSX.Element {
       form.setFieldValue("value", `R$ ${currentOrder?.price}`);
     }
   }, [currentOrder]);
+
+  useEffect(() => {
+    const { value, discountInMoney } = form.values;
+
+    if (discountInMoney) {
+      const percentage =
+        (removeCurrencyMask(discountInMoney) / removeCurrencyMask(value)) * 100;
+
+      form.setFieldValue("discount", percentage?.toString());
+    }
+  }, [form.values.discountInMoney]);
 
   const renderReportType = (): JSX.Element => {
     return (
@@ -239,7 +250,7 @@ export default function TransactionsDashboard(): JSX.Element {
             {...form.getInputProps("orderId")}
           />
         )}
-        <SimpleGrid cols={form.values.type === TransactionsEnum.DEBT ? 1 : 2}>
+        <SimpleGrid cols={form.values.type === TransactionsEnum.DEBT ? 1 : 3}>
           <NumericFormat
             thousandSeparator="."
             decimalSeparator=","
@@ -253,17 +264,31 @@ export default function TransactionsDashboard(): JSX.Element {
             {...form.getInputProps("value")}
           />
           {form.values.type === TransactionsEnum.CREDIT && (
-            <NumericFormat
-              thousandSeparator="."
-              decimalSeparator=","
-              suffix=" %"
-              decimalScale={2}
-              fixedDecimalScale
-              allowNegative={false}
-              customInput={TextInput}
-              label="Valor do desconto (%)"
-              {...form.getInputProps("discount")}
-            />
+            <>
+              <NumericFormat
+                thousandSeparator="."
+                decimalSeparator=","
+                prefix="R$ "
+                decimalScale={2}
+                fixedDecimalScale
+                allowNegative={false}
+                customInput={TextInput}
+                label="Valor do desconto (R$)"
+                {...form.getInputProps("discountInMoney")}
+              />
+              <NumericFormat
+                thousandSeparator="."
+                decimalSeparator=","
+                suffix=" %"
+                decimalScale={2}
+                fixedDecimalScale
+                allowNegative={false}
+                customInput={TextInput}
+                label="Valor do desconto (%)"
+                disabled
+                {...form.getInputProps("discount")}
+              />
+            </>
           )}
         </SimpleGrid>
         <Textarea
@@ -499,7 +524,7 @@ export default function TransactionsDashboard(): JSX.Element {
 
       {!data?.length && <NoData />}
       <Modal
-        size={modalInfos?.type === "LIST" ? "calc(100vw - 87px)" : "md"}
+        size={modalInfos?.type === "LIST" ? "calc(100vw - 87px)" : "xl"}
         opened={Boolean(modalInfos?.opened)}
         onClose={() => setModalInfos(null)}
         centered

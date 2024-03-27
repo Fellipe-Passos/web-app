@@ -74,17 +74,46 @@ export interface GetOrderReturnType {
   material: Material;
 }
 
+interface GetOrdersProps {
+  type?: "ALL" | "FOR_DELIVERY" | "FINALIZED";
+  search?: string;
+  limit: number;
+  offset: number;
+}
+
+export async function getOrders({
+  limit,
+  offset,
+  search,
+  type,
+}: GetOrdersProps): Promise<{ totalCount: number; orders: any[] }> {
+  const api = new ApiService();
+
+  const endpoint = `/orders-dashboard`;
+
+  return (await api.RequestData("POST", endpoint, {
+    limit,
+    offset,
+    search,
+    type,
+  })) as Promise<{
+    totalCount: number;
+    orders: any[];
+  }>;
+}
+
 export async function listOrdersInProgress(
   type?: "ALL" | "IN_PROGRESS" | "WAITING_STEPS" | "FOR_DELIVERY" | "FINALIZED",
   search?: string
-): Promise<any[]> {
+): Promise<{ totalCount: number; orders: any[] }> {
   const api = new ApiService();
 
   return (await api.RequestData(
     "GET",
-    `/orders-in-progress?type=${type}&search=${search}`,
-    {}
-  )) as Promise<any[]>;
+    search
+      ? `/orders-in-progress?type=${type}&search=${search}`
+      : `/orders-in-progress?type=${type}`
+  )) as Promise<{ totalCount: number; orders: any[] }>;
 }
 
 export const getOrder = async (orderId: string): Promise<any> => {

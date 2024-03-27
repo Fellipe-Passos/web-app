@@ -10,6 +10,9 @@ export const transactionSchema = Yup.object().shape({
 
     clientId: Yup.string().required('O campo é obrigatório.'),
     type: Yup.string().required('O campo é obrigatório.'),
+
+    discountInMoney: Yup.string().nullable(),
+
     discount: Yup.string().nullable(),
 
     orderId: Yup.string().nullable(),
@@ -29,6 +32,7 @@ export const transactionValues = {
     clientId: '',
     type: TransactionsEnum.DEBT,
     discount: '',
+    discountInMoney: '',
     orderId: undefined,
     billingType: undefined,
     dueDate: undefined,
