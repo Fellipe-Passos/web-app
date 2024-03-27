@@ -1,3 +1,4 @@
+import { useMantineTheme } from "@mantine/core";
 import { ApexOptions } from "apexcharts";
 import { useState } from "react";
 import ReactApexChart from "react-apexcharts";
@@ -8,6 +9,8 @@ interface ApexChartProps {
 }
 
 function ApexChart({ data, title }: ApexChartProps) {
+  const { colors } = useMantineTheme();
+
   const values = data?.map((info) => {
     return info?.orders;
   });
@@ -21,6 +24,7 @@ function ApexChart({ data, title }: ApexChartProps) {
       {
         name: "Entregas",
         data: values,
+        color: colors.main[4],
       },
     ],
     options: {

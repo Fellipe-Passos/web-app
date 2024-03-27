@@ -69,14 +69,7 @@ function Ranking({ padding }: RankingProps) {
   const rankings = data?.rankings;
 
   return (
-    <Stack h={"100%"}>
-      <Group justify="end" display={padding ? "none" : "flex"}>
-        {/* <MantineTooltip label="Tela cheia">
-          <ActionIcon c={'main'} onClick={openFullscreen}>
-            <Resize />
-          </ActionIcon>
-        </MantineTooltip> */}
-      </Group>
+    <Stack h={"100%"} p={0} m={0}>
       <Stack h={"47.5vh"}>
         <SimpleGrid cols={3}>
           <Stack h={"47.5vh"} style={{ gap: 0 }}>
