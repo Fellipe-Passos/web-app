@@ -42,7 +42,10 @@ import {
   listClients,
 } from "../../Orders/NewOrder/services/clients.service";
 import { transactionSchema, transactionValues } from "./schema";
-import { listOrdersInProgress } from "../../Orders/Dashboard/index.service";
+import {
+  getOrders,
+  listOrdersInProgress,
+} from "../../Orders/Dashboard/index.service";
 import { BillingTypesEnum } from "../../../../types/billingTypes";
 import { DateInput } from "@mantine/dates";
 
@@ -59,9 +62,15 @@ export default function TransactionsDashboard(): JSX.Element {
 
   const queryClient = useQueryClient();
 
-  const { data: ordersData } = useQuery(["list-orders"], () =>
-    listOrdersInProgress("FOR_DELIVERY")
-  );
+  const { data: ordersData, mutate: getOrdersMutate } = useMutation(getOrders);
+
+  useEffect(() => {
+    getOrdersMutate({
+      type: "FOR_DELIVERY",
+      limit: 50,
+      offset: 0,
+    });
+  }, []);
 
   const { data } = useQuery(
     "transactions-by-customer",
