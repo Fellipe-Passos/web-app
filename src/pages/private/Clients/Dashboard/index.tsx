@@ -71,6 +71,7 @@ export default function ClientsDashboard() {
               <Table.Th>Nome</Table.Th>
               <Table.Th>Telefone</Table.Th>
               <Table.Th>CPF/CNPJ</Table.Th>
+              <Table.Th>Senha plataforma</Table.Th>
               <Table.Th>Id ASAAS</Table.Th>
               <Table.Th>Cobrança de pedidos</Table.Th>
               <Table.Th>Ações</Table.Th>
@@ -96,6 +97,7 @@ export default function ClientsDashboard() {
                     {humanizeCellphone(user?.phone?.replace("5582", "829"))}
                   </Table.Td>
                   <Table.Td>{document}</Table.Td>
+                  <Table.Td>{user?.password ?? "-"}</Table.Td>
                   <Table.Td>{user?.asaasCustomerId ?? "-"}</Table.Td>
                   <Table.Td>
                     <Badge

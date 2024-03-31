@@ -7,6 +7,7 @@ interface Client {
     asaasCustomerId?: string
     CPF: string
     orderCollection: boolean
+    password?: string
 }
 
 export async function listClients(search?: string): Promise<Client[] | null | undefined> {

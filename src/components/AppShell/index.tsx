@@ -104,7 +104,7 @@ export function AppShell({ children, pageTitle, returnButton }: AppShellProps) {
 
       <MantineAppShell.Navbar className={classes.navbar}>
         <MantineAppShell.Section className={classes.section}>
-          <Image src={logo} />
+          <Image src={logo} mah={"100%"} />
         </MantineAppShell.Section>
 
         <MantineAppShell.Section grow pt={"md"} h={"100%"}>

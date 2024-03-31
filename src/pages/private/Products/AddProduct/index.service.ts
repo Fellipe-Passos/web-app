@@ -60,3 +60,29 @@ export const inventoryToSelect = (): Array<{ value: string, label: string }> => 
         },
     ]
 }
+
+interface CreateCategoryProps {
+    category: string
+}
+
+export const CreateCategory = async (data: CreateCategoryProps) => {
+    const api = new ApiService();
+
+    return await api.RequestData("POST", "/category", data);
+};
+
+export const listCategories = async () => {
+    const api = new ApiService();
+
+    return await api.RequestData("GET", "/categories", {});
+};
+
+export const categoriesToSelect = (data?: any[]): Array<{ value: string, label: string }> => {
+    if (!data) return []
+
+    const mapedCategories = data?.map((category: any) => {
+        return { label: category?.category, value: category?.id?.toString() }
+    })
+
+    return mapedCategories
+}

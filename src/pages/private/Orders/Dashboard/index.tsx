@@ -5,6 +5,7 @@ import {
   Button,
   Group,
   Pagination,
+  Radio,
   Stack,
   Table,
   TextInput,
@@ -14,7 +15,7 @@ import { useDebouncedState } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate } from "react-router-dom";
 import {
   Check,
@@ -33,7 +34,12 @@ import { UserRoles } from "../../../../types/user";
 import { formatCurrency } from "../../../../utils";
 import { getUserRole } from "../../../../utils/userToken";
 import { SendToFinancial } from "../NewOrder/services/send-to-financial.service";
-import { DeleteOrder, FinishOrder, getOrders } from "./index.service";
+import {
+  DeleteOrder,
+  FinishOrder,
+  countOrders,
+  getOrders,
+} from "./index.service";
 import { getStatus, header } from "./utils/table";
 
 function diffDays(date1: Date, date2: Date): number {
@@ -90,11 +96,24 @@ export default function OrdersDashboard(): JSX.Element {
   const [loading, setIsLoading] = useState(false);
   const userRole = getUserRole();
 
+  const [filter, setFilter] = useState<
+    | "GENERAL"
+    | "NO_STEPS "
+    | UserRoles.Digital
+    | UserRoles.Plaster
+    | UserRoles.Milling
+    | UserRoles.Finishing
+    | "FINISHED_STEPS"
+    | "UNDER_ANALYSIS"
+  >("GENERAL");
+
   const {
     isLoading: orderDataIsLoading,
     data: ordersData,
     mutate: getOrdersMutate,
   } = useMutation(getOrders);
+
+  const { data: countOrdersData } = useQuery("count-orders", countOrders);
 
   const [pagination, setPagination] = useState({
     limit: 11,
@@ -104,7 +123,9 @@ export default function OrdersDashboard(): JSX.Element {
   const { innerHeight } = window;
 
   const handleLimit = (): void => {
-    const countRowsInTable = Math.round((11 * innerHeight) / 695);
+    const qtd = activeTab === "ALL" ? 10 : 11;
+
+    const countRowsInTable = Math.round((qtd * innerHeight) / 695);
 
     setPagination({
       ...pagination,
@@ -118,7 +139,7 @@ export default function OrdersDashboard(): JSX.Element {
 
   useEffect(() => {
     handleLimit();
-  }, [innerHeight]);
+  }, [innerHeight, activeTab]);
 
   useEffect(() => {
     getOrdersMutate({
@@ -126,8 +147,9 @@ export default function OrdersDashboard(): JSX.Element {
       search,
       limit: pagination.limit,
       offset: pagination.offset,
+      filter,
     });
-  }, [activeTab, search, pagination]);
+  }, [activeTab, search, pagination, filter]);
 
   const { mutate: finishOrderMutate, isLoading: finishOrderIsLoading } =
     useMutation(FinishOrder);
@@ -265,6 +287,7 @@ export default function OrdersDashboard(): JSX.Element {
     ordersData?.orders &&
     ordersData?.orders?.map((order) => {
       const badge = getStatus({
+        underAnalysis: order?.underAnalysis,
         delivered: order?.delivered ?? false,
         finished: order?.finished ?? false,
         deliveredAt: order?.deliveredAt ?? null,
@@ -409,6 +432,62 @@ export default function OrdersDashboard(): JSX.Element {
           </Button>
         </Group>
       </Group>
+      {activeTab === "ALL" && (
+        <Radio.Group
+          label="Filtro por status"
+          value={filter}
+          onChange={(e) =>
+            setFilter(
+              e as
+                | "GENERAL"
+                | "NO_STEPS "
+                | UserRoles.Digital
+                | UserRoles.Plaster
+                | UserRoles.Milling
+                | UserRoles.Finishing
+                | "FINISHED_STEPS"
+                | "UNDER_ANALYSIS"
+            )
+          }
+        >
+          <Group>
+            <Radio
+              label={`Geral - ${countOrdersData?.general ?? 0}`}
+              value={"GENERAL"}
+            />
+            <Radio
+              label={`Em análise - ${countOrdersData?.underAnalysis ?? 0}`}
+              value={"UNDER_ANALYSIS"}
+            />
+            <Radio
+              label={`Sem etapas - ${countOrdersData?.noSteps ?? 0}`}
+              value={"NO_STEPS"}
+            />
+            <Radio
+              label={`Gesso - ${countOrdersData?.plaster ?? 0}`}
+              value={UserRoles.Plaster}
+            />
+            <Radio
+              label={`Digital - ${countOrdersData?.digital ?? 0}`}
+              value={UserRoles.Digital}
+            />
+            <Radio
+              label={`Fresagem - ${countOrdersData?.milling ?? 0}`}
+              value={UserRoles.Milling}
+            />
+            <Radio
+              label={`Acabamento - ${countOrdersData?.finishing ?? 0}`}
+              value={UserRoles.Finishing}
+            />
+            <Radio
+              label={`Etapas finalizadas - ${
+                countOrdersData?.finishedSteps ?? 0
+              }`}
+              value={"FINISHED_STEPS"}
+            />
+          </Group>
+        </Radio.Group>
+      )}
       <Box h={"100%"}>
         {ordersData?.orders?.length && !orderDataIsLoading ? (
           <Table.ScrollContainer minWidth={"100%"}>

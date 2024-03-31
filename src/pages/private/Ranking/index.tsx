@@ -24,11 +24,7 @@ import NoData from "../../../components/NoData";
 import Loading from "../../../components/Loading";
 import BarChart from "../../../components/Chart";
 
-interface RankingProps {
-  padding?: string;
-}
-
-function Ranking({ padding }: RankingProps) {
+function Ranking() {
   const [opened, { close, open }] = useDisclosure(false);
   const [usersProductionData, setUsersProductionData] = useState<any | null>();
   const queryClient = useQueryClient();

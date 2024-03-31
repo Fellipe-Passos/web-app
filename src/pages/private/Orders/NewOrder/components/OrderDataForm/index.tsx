@@ -49,16 +49,23 @@ export default function OrderDataForm({
   const { orderId } = useParams();
 
   useEffect(() => {
+    const materialsSendedByClient = undefined;
+
+    if (orderData?.materialsSendedByClient) {
+      if (typeof orderData?.materialsSendedByClient === "string") {
+        orderData?.materialsSendedByClient?.split(", ");
+      } else {
+        orderData?.materialsSendedByClient;
+      }
+    }
+
     if (orderData && orderId) {
       form.setValues({
         clientId: orderData?.clientId?.toString() ?? "0",
         patientName: orderData?.patientName ?? "",
         color: orderData?.color,
         laboratoryColor: orderData?.laboratoryColor,
-        materialsSendedByClient:
-          typeof orderData?.materialsSendedByClient === "string"
-            ? orderData?.materialsSendedByClient?.split(", ")
-            : orderData?.materialsSendedByClient,
+        materialsSendedByClient,
         observations: orderData?.observations ?? "",
         services: orderData?.services?.length
           ? orderData?.services?.map((service: any) => ({
@@ -80,6 +87,9 @@ export default function OrderDataForm({
   const { data: materialsData } = useQuery("list-materials", () =>
     listMaterials()
   );
+
+  console.log(materialsData);
+
   const { data: servicesData } = useQuery("list-services", listServices);
 
   const getSelectedService = (value: number) => {

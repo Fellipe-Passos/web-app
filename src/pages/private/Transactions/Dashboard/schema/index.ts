@@ -23,7 +23,9 @@ export const transactionSchema = Yup.object().shape({
 
     installmentCount: Yup.string().nullable(),
 
-    installmentValue: Yup.string().nullable()
+    installmentValue: Yup.string().nullable(),
+
+    emitCollection: Yup.boolean().required('O campo é obrigatório.'),
 });
 
 export const transactionValues = {
@@ -37,5 +39,6 @@ export const transactionValues = {
     billingType: undefined,
     dueDate: undefined,
     installmentCount: undefined,
-    installmentValue: undefined
+    installmentValue: undefined,
+    emitCollection: false
 }

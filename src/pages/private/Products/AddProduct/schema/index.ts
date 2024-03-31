@@ -16,7 +16,10 @@ export const productSchema = Yup.object().shape({
     table: Yup.string()
         .required('O campo é obrigatório.'),
 
-    clientId: Yup.string().nullable()
+    clientId: Yup.string().nullable(),
+
+    categoryId: Yup.string()
+        .required('O campo é obrigatório.'),
 });
 
 export const productSchemaInitialValues = {
@@ -25,5 +28,6 @@ export const productSchemaInitialValues = {
     brand: '',
     qtd: '',
     table: '',
-    clientId: undefined
+    clientId: undefined,
+    categoryId: undefined
 }

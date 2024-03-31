@@ -79,6 +79,15 @@ interface GetOrdersProps {
   search?: string;
   limit: number;
   offset: number;
+  filter?:
+    | "GENERAL"
+    | "NO_STEPS "
+    | UserRoles.Digital
+    | UserRoles.Plaster
+    | UserRoles.Milling
+    | UserRoles.Finishing
+    | "FINISHED_STEPS"
+    | "UNDER_ANALYSIS";
 }
 
 export async function getOrders({
@@ -86,6 +95,7 @@ export async function getOrders({
   offset,
   search,
   type,
+  filter,
 }: GetOrdersProps): Promise<{ totalCount: number; orders: any[] }> {
   const api = new ApiService();
 
@@ -96,10 +106,19 @@ export async function getOrders({
     offset,
     search,
     type,
+    filter,
   })) as Promise<{
     totalCount: number;
     orders: any[];
   }>;
+}
+
+export async function countOrders(): Promise<any> {
+  const api = new ApiService();
+
+  const endpoint = `/orders-dashboard/count`;
+
+  return (await api.RequestData("GET", endpoint, {})) as Promise<any>;
 }
 
 export async function listOrdersInProgress(

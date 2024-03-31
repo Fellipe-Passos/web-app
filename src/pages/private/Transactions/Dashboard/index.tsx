@@ -3,6 +3,7 @@ import {
   Badge,
   Box,
   Button,
+  Checkbox,
   Group,
   Modal,
   Radio,
@@ -26,10 +27,12 @@ import {
   reportTransaction,
 } from "./index.service";
 
+import { DateInput } from "@mantine/dates";
 import { useForm, yupResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import Loading from "../../../../components/Loading";
 import NoData from "../../../../components/NoData";
+import { BillingTypesEnum } from "../../../../types/billingTypes";
 import { UserRoles } from "../../../../types/user";
 import {
   formatCurrency,
@@ -37,17 +40,12 @@ import {
   removeCurrencyMask,
 } from "../../../../utils";
 import { getUserRole } from "../../../../utils/userToken";
+import { getOrders } from "../../Orders/Dashboard/index.service";
 import {
   getClientsToSelect,
   listClients,
 } from "../../Orders/NewOrder/services/clients.service";
 import { transactionSchema, transactionValues } from "./schema";
-import {
-  getOrders,
-  listOrdersInProgress,
-} from "../../Orders/Dashboard/index.service";
-import { BillingTypesEnum } from "../../../../types/billingTypes";
-import { DateInput } from "@mantine/dates";
 
 interface ModalProps {
   opened: boolean;
@@ -97,9 +95,7 @@ export default function TransactionsDashboard(): JSX.Element {
   });
 
   const onSubmit = () => {
-    const { hasErrors, errors } = form.validate();
-
-    console.log(errors);
+    const { hasErrors } = form.validate();
 
     if (hasErrors) return;
 
@@ -114,9 +110,11 @@ export default function TransactionsDashboard(): JSX.Element {
       installmentCount,
       installmentValue,
       orderId,
+      emitCollection,
     } = form.values;
 
     const dataToSend: any = {
+      emitCollection: Boolean(emitCollection),
       manualInput: true,
       value: removeCurrencyMask(value),
       description,
@@ -202,15 +200,20 @@ export default function TransactionsDashboard(): JSX.Element {
     (order: any) => Number(order?.client?.id) === Number(form.values.clientId)
   );
 
-  const currentOrder = ordersData?.orders?.find(
-    (order: any) => Number(order?.id) === Number(form.values?.orderId)
-  );
-
   useEffect(() => {
-    if (currentOrder) {
-      form.setFieldValue("value", `R$ ${currentOrder?.price}`);
+    if (form.values?.orderId && ordersData?.orders) {
+      let totalValue = 0;
+
+      const selectedOrder = ordersData.orders.find(
+        (order: any) => Number(order.id) === Number(form.values.orderId)
+      );
+      if (selectedOrder) {
+        totalValue += Number(selectedOrder.price);
+      }
+
+      form.setFieldValue("value", `R$ ${totalValue}`);
     }
-  }, [currentOrder]);
+  }, [form.values.orderId, ordersData?.orders]);
 
   useEffect(() => {
     const { value, discountInMoney } = form.values;
@@ -306,58 +309,66 @@ export default function TransactionsDashboard(): JSX.Element {
           {...form.getInputProps("description")}
         />
         {form.values.type === TransactionsEnum.CREDIT && (
-          <>
-            <Radio.Group
-              label="Tipo de cobrança"
-              withAsterisk
-              styles={{
-                label: {
-                  fontWeight: 700,
-                },
-              }}
-              {...form.getInputProps("billingType")}
-            >
-              <Group style={{ gap: "2rem" }}>
-                <Radio label="Boleto único" value={BillingTypesEnum.Boleto} />
-                <Radio
-                  label="Boleto parcelado"
-                  value={BillingTypesEnum.BoletoParcelado}
-                />
-                <Radio label="PIX" value={BillingTypesEnum.PIX} />
-              </Group>
-            </Radio.Group>
-
-            <DateInput
-              label="Data de vencimento"
-              {...form.getInputProps("dueDate")}
-            />
-
-            {form.values.billingType === BillingTypesEnum.BoletoParcelado && (
-              <SimpleGrid cols={2}>
-                <NumericFormat
-                  suffix=" x"
-                  allowNegative={false}
-                  customInput={TextInput}
-                  label="Quantidade de parcelas"
-                  {...form.getInputProps("installmentCount")}
-                />
-
-                <NumericFormat
-                  thousandSeparator="."
-                  decimalSeparator=","
-                  prefix="R$ "
-                  decimalScale={2}
-                  fixedDecimalScale
-                  allowNegative={false}
-                  customInput={TextInput}
-                  label="Valor da parcela"
-                  withAsterisk
-                  {...form.getInputProps("installmentValue")}
-                />
-              </SimpleGrid>
-            )}
-          </>
+          <Checkbox
+            label="Emissão de cobrança pela ASAAS"
+            description="Ao selecionar esta opção, será gerada uma cobrança para o cliente na ASAAS. Caso contrário, apenas o registro da transação será reportada."
+            {...form.getInputProps("emitCollection", { type: "checkbox" })}
+          />
         )}
+        {form.values.type === TransactionsEnum.CREDIT &&
+          form.values.emitCollection && (
+            <>
+              <Radio.Group
+                label="Tipo de cobrança"
+                withAsterisk
+                styles={{
+                  label: {
+                    fontWeight: 700,
+                  },
+                }}
+                {...form.getInputProps("billingType")}
+              >
+                <Group style={{ gap: "2rem" }}>
+                  <Radio label="Boleto único" value={BillingTypesEnum.Boleto} />
+                  <Radio
+                    label="Boleto parcelado"
+                    value={BillingTypesEnum.BoletoParcelado}
+                  />
+                  <Radio label="PIX" value={BillingTypesEnum.PIX} />
+                </Group>
+              </Radio.Group>
+
+              <DateInput
+                label="Data de vencimento"
+                {...form.getInputProps("dueDate")}
+              />
+
+              {form.values.billingType === BillingTypesEnum.BoletoParcelado && (
+                <SimpleGrid cols={2}>
+                  <NumericFormat
+                    suffix=" x"
+                    allowNegative={false}
+                    customInput={TextInput}
+                    label="Quantidade de parcelas"
+                    {...form.getInputProps("installmentCount")}
+                  />
+
+                  <NumericFormat
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    prefix="R$ "
+                    decimalScale={2}
+                    fixedDecimalScale
+                    allowNegative={false}
+                    customInput={TextInput}
+                    label="Valor da parcela"
+                    withAsterisk
+                    {...form.getInputProps("installmentValue")}
+                  />
+                </SimpleGrid>
+              )}
+            </>
+          )}
         <Group justify="space-between">
           <Button
             radius={"xl"}

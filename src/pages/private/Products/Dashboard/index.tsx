@@ -1,4 +1,5 @@
 import {
+  Accordion,
   ActionIcon,
   Button,
   Group,
@@ -151,7 +152,87 @@ export default function ProductsDashboard() {
         </Button>
       </Group>
 
-      <Table.ScrollContainer minWidth={"100%"}>
+      <Accordion>
+        {data?.map((category: any, index: number) => (
+          <Accordion.Item key={index} value={category?.id?.toString()}>
+            <Accordion.Control>{category?.category}</Accordion.Control>
+            <Accordion.Panel>
+              <Table.ScrollContainer minWidth={"100%"}>
+                <Table striped>
+                  <Table.Thead>
+                    <Table.Tr>
+                      {activeTab === InventoryEnum.Clients && (
+                        <Table.Th>Cliente</Table.Th>
+                      )}
+                      <Table.Th>Marca</Table.Th>
+                      <Table.Th>Nome</Table.Th>
+                      <Table.Th>Preço</Table.Th>
+                      <Table.Th>Qtd. Estoque</Table.Th>
+                      <Table.Th>Ações</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {category?.products?.map((product: any) => (
+                      <Table.Tr key={product?.id}>
+                        {activeTab === InventoryEnum.Clients && (
+                          <Table.Td>{product?.client?.name ?? "-"}</Table.Td>
+                        )}
+                        <Table.Td>{product?.brand ?? "-"}</Table.Td>
+                        <Table.Td style={{ paddingLeft: "1rem" }}>
+                          {product?.name ?? "-"}
+                        </Table.Td>
+                        <Table.Td>{formatCurrency(product?.price)}</Table.Td>
+                        <Table.Td>{product?.qtd ?? 0}</Table.Td>
+                        <Table.Td>
+                          <Group>
+                            <Tooltip label="Editar">
+                              <ActionIcon
+                                color="blue"
+                                radius={"xl"}
+                                onClick={() =>
+                                  navigate(`/edit-product/${product?.id}`)
+                                }
+                              >
+                                <Pencil />
+                              </ActionIcon>
+                            </Tooltip>
+                            {[
+                              InventoryEnum.NonDental,
+                              InventoryEnum.RawMaterials,
+                            ]?.includes(activeTab) && (
+                              <Tooltip label="Reportar saída manualmente">
+                                <ActionIcon
+                                  color="green"
+                                  onClick={() => {
+                                    open();
+                                    inputManualForm.setFieldValue(
+                                      "productId",
+                                      product?.id?.toString()
+                                    );
+                                  }}
+                                >
+                                  <Report />
+                                </ActionIcon>
+                              </Tooltip>
+                            )}
+                            <Tooltip label="Excluir">
+                              <ActionIcon>
+                                <Trash />
+                              </ActionIcon>
+                            </Tooltip>
+                          </Group>
+                        </Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+              </Table.ScrollContainer>
+            </Accordion.Panel>
+          </Accordion.Item>
+        ))}
+      </Accordion>
+
+      {/* <Table.ScrollContainer minWidth={"100%"}>
         <Table striped>
           <Table.Thead>
             <Table.Tr>
@@ -218,7 +299,7 @@ export default function ProductsDashboard() {
             ))}
           </Table.Tbody>
         </Table>
-      </Table.ScrollContainer>
+      </Table.ScrollContainer> */}
 
       {!data?.length && !isLoading && <NoData />}
       {!data?.length && isLoading && <Loading />}
