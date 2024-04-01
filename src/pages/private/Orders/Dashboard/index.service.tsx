@@ -74,17 +74,65 @@ export interface GetOrderReturnType {
   material: Material;
 }
 
+interface GetOrdersProps {
+  type?: "ALL" | "FOR_DELIVERY" | "FINALIZED";
+  search?: string;
+  limit: number;
+  offset: number;
+  filter?:
+    | "GENERAL"
+    | "NO_STEPS "
+    | UserRoles.Digital
+    | UserRoles.Plaster
+    | UserRoles.Milling
+    | UserRoles.Finishing
+    | "FINISHED_STEPS"
+    | "UNDER_ANALYSIS";
+}
+
+export async function getOrders({
+  limit,
+  offset,
+  search,
+  type,
+  filter,
+}: GetOrdersProps): Promise<{ totalCount: number; orders: any[] }> {
+  const api = new ApiService();
+
+  const endpoint = `/orders-dashboard`;
+
+  return (await api.RequestData("POST", endpoint, {
+    limit,
+    offset,
+    search,
+    type,
+    filter,
+  })) as Promise<{
+    totalCount: number;
+    orders: any[];
+  }>;
+}
+
+export async function countOrders(): Promise<any> {
+  const api = new ApiService();
+
+  const endpoint = `/orders-dashboard/count`;
+
+  return (await api.RequestData("GET", endpoint, {})) as Promise<any>;
+}
+
 export async function listOrdersInProgress(
-  type?: "IN_PROGRESS" | "WAITING_STEPS" | "FOR_DELIVERY" | "FINALIZED",
+  type?: "ALL" | "IN_PROGRESS" | "WAITING_STEPS" | "FOR_DELIVERY" | "FINALIZED",
   search?: string
-): Promise<any[]> {
+): Promise<{ totalCount: number; orders: any[] }> {
   const api = new ApiService();
 
   return (await api.RequestData(
     "GET",
-    `/orders-in-progress?type=${type}&search=${search}`,
-    {}
-  )) as Promise<any[]>;
+    search
+      ? `/orders-in-progress?type=${type}&search=${search}`
+      : `/orders-in-progress?type=${type}`
+  )) as Promise<{ totalCount: number; orders: any[] }>;
 }
 
 export const getOrder = async (orderId: string): Promise<any> => {

@@ -33,11 +33,16 @@ export const clientSchema = Yup.object().shape({
     complement: Yup.string()
         .nullable(),
 
+    clientType: Yup.string()
+        .required('O campo é obrigatório.'),
+
     CPF: Yup.string()
         .required('O campo é obrigatório.'),
 
     email: Yup.string().email('Email inválido')
         .required('O campo é obrigatório.'),
+
+    orderCollection: Yup.boolean().required('O campo é obrigatório.')
 });
 
 export const clientSchemaInitialValues = {
@@ -51,6 +56,8 @@ export const clientSchemaInitialValues = {
     street: '',
     zip: '',
     complement: '',
+    clientType: 'PF',
     CPF: '',
-    email: ''
+    email: '',
+    orderCollection: true
 };

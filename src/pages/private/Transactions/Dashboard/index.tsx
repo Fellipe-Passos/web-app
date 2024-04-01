@@ -3,6 +3,7 @@ import {
   Badge,
   Box,
   Button,
+  Checkbox,
   Group,
   Modal,
   Radio,
@@ -14,24 +15,32 @@ import {
   TextInput,
   Textarea,
 } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Check, Eye, ReportMoney, X } from "tabler-icons-react";
 import {
   TransactionsEnum,
+  getOrdersToSelect,
   getTransactionsByCustomer,
   getTransactionsCustomer,
   reportTransaction,
 } from "./index.service";
 
+import { DateInput } from "@mantine/dates";
 import { useForm, yupResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import Loading from "../../../../components/Loading";
 import NoData from "../../../../components/NoData";
+import { BillingTypesEnum } from "../../../../types/billingTypes";
 import { UserRoles } from "../../../../types/user";
-import { formatCurrency, removeCurrencyMask } from "../../../../utils";
+import {
+  formatCurrency,
+  removeCPFMask,
+  removeCurrencyMask,
+} from "../../../../utils";
 import { getUserRole } from "../../../../utils/userToken";
+import { getOrders } from "../../Orders/Dashboard/index.service";
 import {
   getClientsToSelect,
   listClients,
@@ -50,6 +59,16 @@ export default function TransactionsDashboard(): JSX.Element {
   const userRole = getUserRole();
 
   const queryClient = useQueryClient();
+
+  const { data: ordersData, mutate: getOrdersMutate } = useMutation(getOrders);
+
+  useEffect(() => {
+    getOrdersMutate({
+      type: "FOR_DELIVERY",
+      limit: 50,
+      offset: 0,
+    });
+  }, []);
 
   const { data } = useQuery(
     "transactions-by-customer",
@@ -80,9 +99,22 @@ export default function TransactionsDashboard(): JSX.Element {
 
     if (hasErrors) return;
 
-    const { clientId, description, type, value, discount } = form.values;
+    const {
+      clientId,
+      description,
+      type,
+      value,
+      discount,
+      billingType,
+      dueDate,
+      installmentCount,
+      installmentValue,
+      orderId,
+      emitCollection,
+    } = form.values;
 
-    const dataToSend = {
+    const dataToSend: any = {
+      emitCollection: Boolean(emitCollection),
       manualInput: true,
       value: removeCurrencyMask(value),
       description,
@@ -90,6 +122,24 @@ export default function TransactionsDashboard(): JSX.Element {
       type: type as unknown as TransactionsEnum,
       discount: discount?.trim()?.length ? removeCurrencyMask(discount) : 0,
     };
+
+    if (orderId) dataToSend.orderId = Number(orderId);
+
+    if (billingType)
+      dataToSend.billingType = [
+        BillingTypesEnum.Boleto,
+        BillingTypesEnum.BoletoParcelado,
+      ]?.includes(billingType)
+        ? "BOLETO"
+        : "PIX";
+
+    if (dueDate) dataToSend.dueDate = dueDate;
+
+    if (installmentCount)
+      dataToSend.installmentCount = removeCPFMask(installmentCount);
+
+    if (installmentValue)
+      dataToSend.installmentValue = removeCurrencyMask(installmentValue);
 
     mutate(dataToSend, {
       onSuccess() {
@@ -146,6 +196,36 @@ export default function TransactionsDashboard(): JSX.Element {
     });
   };
 
+  const filteredOrders = ordersData?.orders?.filter(
+    (order: any) => Number(order?.client?.id) === Number(form.values.clientId)
+  );
+
+  useEffect(() => {
+    if (form.values?.orderId && ordersData?.orders) {
+      let totalValue = 0;
+
+      const selectedOrder = ordersData.orders.find(
+        (order: any) => Number(order.id) === Number(form.values.orderId)
+      );
+      if (selectedOrder) {
+        totalValue += Number(selectedOrder.price);
+      }
+
+      form.setFieldValue("value", `R$ ${totalValue}`);
+    }
+  }, [form.values.orderId, ordersData?.orders]);
+
+  useEffect(() => {
+    const { value, discountInMoney } = form.values;
+
+    if (discountInMoney) {
+      const percentage =
+        (removeCurrencyMask(discountInMoney) / removeCurrencyMask(value)) * 100;
+
+      form.setFieldValue("discount", percentage?.toString());
+    }
+  }, [form.values.discountInMoney]);
+
   const renderReportType = (): JSX.Element => {
     return (
       <Stack>
@@ -172,7 +252,17 @@ export default function TransactionsDashboard(): JSX.Element {
           withAsterisk
           {...form.getInputProps("clientId")}
         />
-        <SimpleGrid cols={form.values.type === TransactionsEnum.DEBT ? 1 : 2}>
+        {form.values.type === TransactionsEnum.CREDIT && (
+          <Select
+            label="Pedido"
+            data={getOrdersToSelect(filteredOrders)}
+            searchable
+            clearable
+            withAsterisk
+            {...form.getInputProps("orderId")}
+          />
+        )}
+        <SimpleGrid cols={form.values.type === TransactionsEnum.DEBT ? 1 : 3}>
           <NumericFormat
             thousandSeparator="."
             decimalSeparator=","
@@ -186,17 +276,31 @@ export default function TransactionsDashboard(): JSX.Element {
             {...form.getInputProps("value")}
           />
           {form.values.type === TransactionsEnum.CREDIT && (
-            <NumericFormat
-              thousandSeparator="."
-              decimalSeparator=","
-              suffix=" %"
-              decimalScale={2}
-              fixedDecimalScale
-              allowNegative={false}
-              customInput={TextInput}
-              label="Valor do desconto (%)"
-              {...form.getInputProps("discount")}
-            />
+            <>
+              <NumericFormat
+                thousandSeparator="."
+                decimalSeparator=","
+                prefix="R$ "
+                decimalScale={2}
+                fixedDecimalScale
+                allowNegative={false}
+                customInput={TextInput}
+                label="Valor do desconto (R$)"
+                {...form.getInputProps("discountInMoney")}
+              />
+              <NumericFormat
+                thousandSeparator="."
+                decimalSeparator=","
+                suffix=" %"
+                decimalScale={2}
+                fixedDecimalScale
+                allowNegative={false}
+                customInput={TextInput}
+                label="Valor do desconto (%)"
+                disabled
+                {...form.getInputProps("discount")}
+              />
+            </>
           )}
         </SimpleGrid>
         <Textarea
@@ -204,6 +308,67 @@ export default function TransactionsDashboard(): JSX.Element {
           withAsterisk
           {...form.getInputProps("description")}
         />
+        {form.values.type === TransactionsEnum.CREDIT && (
+          <Checkbox
+            label="Emissão de cobrança pela ASAAS"
+            description="Ao selecionar esta opção, será gerada uma cobrança para o cliente na ASAAS. Caso contrário, apenas o registro da transação será reportada."
+            {...form.getInputProps("emitCollection", { type: "checkbox" })}
+          />
+        )}
+        {form.values.type === TransactionsEnum.CREDIT &&
+          form.values.emitCollection && (
+            <>
+              <Radio.Group
+                label="Tipo de cobrança"
+                withAsterisk
+                styles={{
+                  label: {
+                    fontWeight: 700,
+                  },
+                }}
+                {...form.getInputProps("billingType")}
+              >
+                <Group style={{ gap: "2rem" }}>
+                  <Radio label="Boleto único" value={BillingTypesEnum.Boleto} />
+                  <Radio
+                    label="Boleto parcelado"
+                    value={BillingTypesEnum.BoletoParcelado}
+                  />
+                  <Radio label="PIX" value={BillingTypesEnum.PIX} />
+                </Group>
+              </Radio.Group>
+
+              <DateInput
+                label="Data de vencimento"
+                {...form.getInputProps("dueDate")}
+              />
+
+              {form.values.billingType === BillingTypesEnum.BoletoParcelado && (
+                <SimpleGrid cols={2}>
+                  <NumericFormat
+                    suffix=" x"
+                    allowNegative={false}
+                    customInput={TextInput}
+                    label="Quantidade de parcelas"
+                    {...form.getInputProps("installmentCount")}
+                  />
+
+                  <NumericFormat
+                    thousandSeparator="."
+                    decimalSeparator=","
+                    prefix="R$ "
+                    decimalScale={2}
+                    fixedDecimalScale
+                    allowNegative={false}
+                    customInput={TextInput}
+                    label="Valor da parcela"
+                    withAsterisk
+                    {...form.getInputProps("installmentValue")}
+                  />
+                </SimpleGrid>
+              )}
+            </>
+          )}
         <Group justify="space-between">
           <Button
             radius={"xl"}
@@ -314,18 +479,12 @@ export default function TransactionsDashboard(): JSX.Element {
     if (modalInfos?.type === "REPORT") return modalInfos?.title ?? "";
 
     if (modalInfos?.type === "LIST")
-      return (
-        <Group justify="space-between">
-          {modalInfos?.title ?? ""}
-          <Button>Imprimir</Button>
-        </Group>
-      );
+      return <Group justify="space-between">{modalInfos?.title ?? ""}</Group>;
   };
 
   return (
     <Stack h="100%">
       <Group justify="flex-end">
-        <Button variant="light">Imprimir</Button>
         <Button
           radius={"xl"}
           leftSection={<ReportMoney />}
@@ -385,7 +544,7 @@ export default function TransactionsDashboard(): JSX.Element {
 
       {!data?.length && <NoData />}
       <Modal
-        size={modalInfos?.type === "LIST" ? "calc(100vw - 87px)" : "md"}
+        size={modalInfos?.type === "LIST" ? "calc(100vw - 87px)" : "xl"}
         opened={Boolean(modalInfos?.opened)}
         onClose={() => setModalInfos(null)}
         centered

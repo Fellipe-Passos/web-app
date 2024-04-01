@@ -1,8 +1,11 @@
 import {
   ActionIcon,
   Badge,
+  Box,
   Button,
   Group,
+  Pagination,
+  Radio,
   Stack,
   Table,
   TextInput,
@@ -30,13 +33,14 @@ import baseURL from "../../../../config/api/baseURL";
 import { UserRoles } from "../../../../types/user";
 import { formatCurrency } from "../../../../utils";
 import { getUserRole } from "../../../../utils/userToken";
+import { SendToFinancial } from "../NewOrder/services/send-to-financial.service";
 import {
   DeleteOrder,
   FinishOrder,
-  listOrdersInProgress,
+  countOrders,
+  getOrders,
 } from "./index.service";
 import { getStatus, header } from "./utils/table";
-import { SendToFinancial } from "../NewOrder/services/send-to-financial.service";
 
 function diffDays(date1: Date, date2: Date): number {
   if (date1.getTime() < date2.getTime()) {
@@ -87,23 +91,65 @@ export default function OrdersDashboard(): JSX.Element {
   const queryClient = useQueryClient();
   const [search, setSearch] = useDebouncedState("", 200);
   const [activeTab, setActiveTab] = useState<
-    "ALL" | "IN_PROGRESS" | "WAITING_STEPS" | "FOR_DELIVERY" | "FINALIZED"
+    "ALL" | "FOR_DELIVERY" | "FINALIZED"
   >("ALL");
   const [loading, setIsLoading] = useState(false);
   const userRole = getUserRole();
 
-  const { isFetching: orderDataIsLoading, data: ordersData } = useQuery(
-    ["list-orders"],
-    () =>
-      listOrdersInProgress(
-        activeTab as
-          | "IN_PROGRESS"
-          | "WAITING_STEPS"
-          | "FOR_DELIVERY"
-          | "FINALIZED"
-          | undefined
-      )
-  );
+  const [filter, setFilter] = useState<
+    | "GENERAL"
+    | "NO_STEPS "
+    | UserRoles.Digital
+    | UserRoles.Plaster
+    | UserRoles.Milling
+    | UserRoles.Finishing
+    | "FINISHED_STEPS"
+    | "UNDER_ANALYSIS"
+  >("GENERAL");
+
+  const {
+    isLoading: orderDataIsLoading,
+    data: ordersData,
+    mutate: getOrdersMutate,
+  } = useMutation(getOrders);
+
+  const { data: countOrdersData } = useQuery("count-orders", countOrders);
+
+  const [pagination, setPagination] = useState({
+    limit: 11,
+    offset: 0,
+  });
+
+  const { innerHeight } = window;
+
+  const handleLimit = (): void => {
+    const qtd = activeTab === "ALL" ? 10 : 11;
+
+    const countRowsInTable = Math.round((qtd * innerHeight) / 695);
+
+    setPagination({
+      ...pagination,
+      limit: countRowsInTable,
+    });
+  };
+
+  window.onresize = () => {
+    handleLimit();
+  };
+
+  useEffect(() => {
+    handleLimit();
+  }, [innerHeight, activeTab]);
+
+  useEffect(() => {
+    getOrdersMutate({
+      type: activeTab,
+      search,
+      limit: pagination.limit,
+      offset: pagination.offset,
+      filter,
+    });
+  }, [activeTab, search, pagination, filter]);
 
   const { mutate: finishOrderMutate, isLoading: finishOrderIsLoading } =
     useMutation(FinishOrder);
@@ -238,9 +284,10 @@ export default function OrdersDashboard(): JSX.Element {
     });
 
   const rows =
-    ordersData &&
-    ordersData.map((order) => {
+    ordersData?.orders &&
+    ordersData?.orders?.map((order) => {
       const badge = getStatus({
+        underAnalysis: order?.underAnalysis,
         delivered: order?.delivered ?? false,
         finished: order?.finished ?? false,
         deliveredAt: order?.deliveredAt ?? null,
@@ -354,37 +401,8 @@ export default function OrdersDashboard(): JSX.Element {
       );
     });
 
-  const onSearch = async () => {
-    await queryClient.fetchQuery("list-orders", () =>
-      listOrdersInProgress(undefined, search)
-    );
-  };
-
-  const onClearSearch = async () => {
-    await queryClient.fetchQuery("list-orders", () =>
-      listOrdersInProgress(
-        activeTab as
-          | "IN_PROGRESS"
-          | "WAITING_STEPS"
-          | "FOR_DELIVERY"
-          | "FINALIZED"
-          | undefined
-      )
-    );
-  };
-
-  useEffect(() => {
-    const hasSearch = Boolean(search?.trim()?.length);
-
-    if (hasSearch) {
-      onSearch();
-    } else {
-      onClearSearch();
-    }
-  }, [search]);
-
   return (
-    <Stack h="100%">
+    <Stack h="100%" style={{ gap: ".5rem" }}>
       <Group justify="space-between">
         <TextInput
           placeholder="Buscar"
@@ -399,25 +417,12 @@ export default function OrdersDashboard(): JSX.Element {
               { label: "Pedidos finalizados", value: "FINALIZED" },
             ]}
             defaultValue={activeTab}
-            onChange={async (
-              e:
-                | "ALL"
-                | "IN_PROGRESS"
-                | "WAITING_STEPS"
-                | "FOR_DELIVERY"
-                | "FINALIZED"
-            ) => {
+            onChange={async (e: "ALL" | "FOR_DELIVERY" | "FINALIZED") => {
+              setPagination({
+                ...pagination,
+                offset: 0,
+              });
               setActiveTab(e);
-              await queryClient.fetchQuery("list-orders", () =>
-                listOrdersInProgress(
-                  e as
-                    | "IN_PROGRESS"
-                    | "WAITING_STEPS"
-                    | "FOR_DELIVERY"
-                    | "FINALIZED"
-                    | undefined
-                )
-              );
             }}
           />
         )}
@@ -427,20 +432,91 @@ export default function OrdersDashboard(): JSX.Element {
           </Button>
         </Group>
       </Group>
-      {ordersData?.length && !orderDataIsLoading ? (
-        <Table.ScrollContainer minWidth={"100%"}>
-          <Table striped highlightOnHover withTableBorder withColumnBorders>
-            <Table.Thead>
-              {header.map((h) => (
-                <Table.Th key={h}>{h}</Table.Th>
-              ))}
-            </Table.Thead>
-            <Table.Tbody>{rows}</Table.Tbody>
-          </Table>
-        </Table.ScrollContainer>
-      ) : null}
-      {orderDataIsLoading && <Loading />}
-      {!orderDataIsLoading && !ordersData?.length && <NoData />}
+      {activeTab === "ALL" && (
+        <Radio.Group
+          label="Filtro por status"
+          value={filter}
+          onChange={(e) =>
+            setFilter(
+              e as
+                | "GENERAL"
+                | "NO_STEPS "
+                | UserRoles.Digital
+                | UserRoles.Plaster
+                | UserRoles.Milling
+                | UserRoles.Finishing
+                | "FINISHED_STEPS"
+                | "UNDER_ANALYSIS"
+            )
+          }
+        >
+          <Group>
+            <Radio
+              label={`Geral - ${countOrdersData?.general ?? 0}`}
+              value={"GENERAL"}
+            />
+            <Radio
+              label={`Em análise - ${countOrdersData?.underAnalysis ?? 0}`}
+              value={"UNDER_ANALYSIS"}
+            />
+            <Radio
+              label={`Sem etapas - ${countOrdersData?.noSteps ?? 0}`}
+              value={"NO_STEPS"}
+            />
+            <Radio
+              label={`Gesso - ${countOrdersData?.plaster ?? 0}`}
+              value={UserRoles.Plaster}
+            />
+            <Radio
+              label={`Digital - ${countOrdersData?.digital ?? 0}`}
+              value={UserRoles.Digital}
+            />
+            <Radio
+              label={`Fresagem - ${countOrdersData?.milling ?? 0}`}
+              value={UserRoles.Milling}
+            />
+            <Radio
+              label={`Acabamento - ${countOrdersData?.finishing ?? 0}`}
+              value={UserRoles.Finishing}
+            />
+            <Radio
+              label={`Etapas finalizadas - ${
+                countOrdersData?.finishedSteps ?? 0
+              }`}
+              value={"FINISHED_STEPS"}
+            />
+          </Group>
+        </Radio.Group>
+      )}
+      <Box h={"100%"}>
+        {ordersData?.orders?.length && !orderDataIsLoading ? (
+          <Table.ScrollContainer minWidth={"100%"}>
+            <Table striped highlightOnHover withTableBorder withColumnBorders>
+              <Table.Thead>
+                {header.map((h) => (
+                  <Table.Th key={h}>{h}</Table.Th>
+                ))}
+              </Table.Thead>
+              <Table.Tbody>{rows}</Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
+        ) : null}
+        {orderDataIsLoading && <Loading />}
+        {!orderDataIsLoading && !ordersData?.orders?.length && <NoData />}
+      </Box>
+      <Group justify="center">
+        <Pagination
+          total={Math.ceil(
+            Number(ordersData?.totalCount) / Number(pagination.limit)
+          )}
+          onChange={(e) => {
+            setPagination({
+              ...pagination,
+              offset: Number(e - 1) * Number(pagination?.limit),
+            });
+          }}
+        />
+      </Group>
     </Stack>
   );
 }

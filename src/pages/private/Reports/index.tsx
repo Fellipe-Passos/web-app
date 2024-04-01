@@ -14,6 +14,7 @@ import {
 import { getServicesToSelect } from "../Orders/NewOrder/services/services.service";
 import {
   User,
+  getRolesToSelect,
   getUsersToSelect,
 } from "../Orders/NewOrder/services/users.service";
 import { listServices } from "../Services/Dashboard/index.service";
@@ -92,6 +93,7 @@ export default function Reports(): JSX.Element {
         : null,
       startDate: productionForm.values.startDate,
       endDate: productionForm.values.finalDate,
+      role: productionForm.values.role ? productionForm.values.role : null,
     };
 
     try {
@@ -300,6 +302,12 @@ export default function Reports(): JSX.Element {
                 data={getUsersToSelect(users as User[])}
                 {...productionForm.getInputProps("userId")}
                 label="Colaborador (Opcional)"
+              />
+              <Select
+                label="Setor (Opcional)"
+                disabled={productionForm.values.userId}
+                data={getRolesToSelect()}
+                {...productionForm.getInputProps("role")}
               />
               <Button
                 w={"10rem"}

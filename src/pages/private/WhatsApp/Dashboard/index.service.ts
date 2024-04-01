@@ -1,10 +1,16 @@
 import { ApiService } from "../../../../config/api/api";
 
 
-export const getLogs = async () => {
+interface GetLogsProps {
+    limit?: number
+    offset?: number
+    type?: 'EXTERNAL' | 'INTERNAL'
+}
+
+export const getLogs = async (data: GetLogsProps) => {
     const api = new ApiService();
 
-    return await api.RequestData("GET", `/logs`, {}) as any[];
+    return await api.RequestData("POST", `/logs-dashboard`, data) as Promise<{ totalCount: number, logs: any[] }>;
 };
 
 interface ResendMessageProps {

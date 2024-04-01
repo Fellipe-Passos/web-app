@@ -13,6 +13,7 @@ import { orderSchema, orderSchemaInitialValues } from "./schema";
 import { createOrder, editOrder } from "./services/create-order.service";
 import axios from "axios";
 import baseURL from "../../../../config/api/baseURL";
+import PaymentData from "./components/PaymentData";
 import { getOrder } from "../Dashboard/index.service";
 
 export default function NewOrder(): JSX.Element {
@@ -27,7 +28,9 @@ export default function NewOrder(): JSX.Element {
     { enabled: Boolean(orderId) }
   );
 
-  const [activeTab, setActiveTab] = useState<"ORDER" | "PRODUCTION">("ORDER");
+  const [activeTab, setActiveTab] = useState<
+    "ORDER" | "PRODUCTION" | "PAYMENT"
+  >("ORDER");
 
   const tabs = [{ label: "Dados do Pedido", value: "ORDER" }];
 
@@ -252,7 +255,7 @@ export default function NewOrder(): JSX.Element {
           <Tabs
             tabs={tabs}
             defaultValue={activeTab}
-            onChange={async (e: "ORDER" | "PRODUCTION") => {
+            onChange={async (e: "ORDER" | "PRODUCTION" | "PAYMENT") => {
               setActiveTab(e);
             }}
           />
@@ -264,6 +267,7 @@ export default function NewOrder(): JSX.Element {
           {activeTab === "PRODUCTION" && (
             <StagesDataForm orderData={orderData} />
           )}
+          {activeTab === "PAYMENT" && <PaymentData />}
         </form>
       </Paper>
       {activeTab === "ORDER" && (

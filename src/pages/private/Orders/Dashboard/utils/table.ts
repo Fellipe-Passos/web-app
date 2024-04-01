@@ -4,6 +4,7 @@ import { translateRole } from "../../../../../utils";
 export const header = [
     "Id",
     "Data",
+    "Atraso",
     "Cliente",
     "Paciente",
     "Valor",
@@ -13,6 +14,7 @@ export const header = [
 
 
 interface GetStatusProps {
+    underAnalysis: boolean;
     delivered: boolean;
     deliveredAt: Date | string | null;
     finished: boolean;
@@ -38,6 +40,7 @@ export const getStatus = ({
     finished,
     finishedAt,
     stages,
+    underAnalysis
 }: GetStatusProps): { text: string; color: string } => {
     const finishedStages = stages?.filter((stage) => stage.finished);
     const finishedAllStages = finishedStages?.length === stages?.length;
@@ -46,9 +49,16 @@ export const getStatus = ({
     const finish = Boolean(finished) || Boolean(finishedAt);
     const delivery = Boolean(delivered) || Boolean(deliveredAt);
 
+    if (underAnalysis) {
+        return {
+            text: 'Em análise',
+            color: 'orange'
+        }
+    }
+
     if (!stages?.length) {
         return {
-            text: "Cadastrar etapas",
+            text: "Sem etapas",
             color: "gray",
         };
     }
@@ -69,7 +79,7 @@ export const getStatus = ({
 
     if (finishedAllStages && !finish && !delivery) {
         return {
-            text: "Liberar para financeiro",
+            text: "Etapas finalizadas",
             color: "green",
         };
     }
@@ -83,7 +93,7 @@ export const getStatus = ({
 
     if (finish && delivery) {
         return {
-            text: "Finalizado",
+            text: "Pago",
             color: "green",
         };
     }

@@ -22,7 +22,9 @@ interface ProductTypeUpdate {
 
 export enum InventoryEnum {
     Inputs = 'INPUTS',
-    RawMaterials = 'RAW_MATERIALS'
+    RawMaterials = 'RAW_MATERIALS',
+    Clients = 'CUSTOMERS',
+    NonDental = 'NON_DENTAL'
 }
 
 export const updateProduct = async (data: ProductTypeUpdate) => {
@@ -47,6 +49,40 @@ export const inventoryToSelect = (): Array<{ value: string, label: string }> => 
         {
             label: 'Matérias-prima',
             value: InventoryEnum.RawMaterials
-        }
+        },
+        {
+            label: 'Individuais (clientes)',
+            value: InventoryEnum.Clients
+        },
+        {
+            label: 'Produtos não-dentais',
+            value: InventoryEnum.NonDental
+        },
     ]
+}
+
+interface CreateCategoryProps {
+    category: string
+}
+
+export const CreateCategory = async (data: CreateCategoryProps) => {
+    const api = new ApiService();
+
+    return await api.RequestData("POST", "/category", data);
+};
+
+export const listCategories = async () => {
+    const api = new ApiService();
+
+    return await api.RequestData("GET", "/categories", {});
+};
+
+export const categoriesToSelect = (data?: any[]): Array<{ value: string, label: string }> => {
+    if (!data) return []
+
+    const mapedCategories = data?.map((category: any) => {
+        return { label: category?.category, value: category?.id?.toString() }
+    })
+
+    return mapedCategories
 }

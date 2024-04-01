@@ -1,5 +1,6 @@
 import AddClient from "../../pages/private/Clients/AddClient";
 import ClientsDashboard from "../../pages/private/Clients/Dashboard";
+import Collections from "../../pages/private/Collections/Dashboard";
 import CreatePayroll from "../../pages/private/Expenses/Employees/CreatePayroll";
 import CreateExpense from "../../pages/private/Expenses/Expenses/Create";
 import Expenses from "../../pages/private/Expenses/Expenses/Dashboard";
@@ -170,6 +171,13 @@ export const homeRoutes: RoutesType[] = [
     path: "/create-payroll",
     element: <CreatePayroll />,
     title: "Adicionar à folha de pagamento",
+    returnButton: true,
+  },
+  {
+    isPrivate: true,
+    path: "/collections",
+    element: <Collections />,
+    title: "Histórico de cobranças",
     returnButton: true,
   },
 ];

@@ -56,3 +56,14 @@ export const getTransactionsCustomer = async (clientId: number | null | undefine
 
     return await api.RequestData("GET", `/transactions/customer/${clientId}`, {}) as Promise<TransactionsCustomerProps[] | null | undefined>;
 };
+
+export const getOrdersToSelect = (orders?: any[]) => {
+    if (!orders?.length) return [];
+
+    const obj = orders?.map((order: any) => ({
+        label: `${order?.id} - ${order?.client?.name}, Pac: ${order?.patientName}`,
+        value: order?.id?.toString()
+    }))
+
+    return obj
+}

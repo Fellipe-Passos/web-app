@@ -1,25 +1,29 @@
 import { ApiService } from "../../../../../config/api/api";
 import { InventoryEnum } from "../../../../../types/inventory";
 
-interface ListMaterialsReturnType {
-    id: number,
-    name: string
-    price: string
-    brand: string
-}
+// interface ListMaterialsReturnType {
+//     id: number,
+//     name: string
+//     price: string
+//     brand: string
+// }
 
-export const listMaterials = async (): Promise<ListMaterialsReturnType[] | null | undefined> => {
+
+export const listMaterials = async (clientId?: number): Promise<any[]> => {
     const api = new ApiService();
 
-    return await api.RequestData("GET", `/list-product/${InventoryEnum.Inputs}`, {}) as Promise<ListMaterialsReturnType[] | null | undefined>;
+    return await api.RequestData("GET", !clientId ? `/list-product/${InventoryEnum.Inputs}` : `/list-product/${InventoryEnum.Inputs}/${clientId}`, {}) as Promise<any[]>;
 };
 
-export const getMaterialsToSelect = (materials: ListMaterialsReturnType[] | null | undefined): Array<{ label: string, value: string }> => {
+export const getMaterialsToSelect = (materials: any[] | undefined): Array<{ group: string, items: Array<{ label: string, value: string }> }> => {
     if (!materials) return []
 
     const formattedMaterials = materials?.map((material) => ({
-        label: material?.name ?? '',
-        value: material?.id?.toString() ?? ''
+        group: material?.category,
+        items: material?.products?.map((product: any) => ({
+            label: product?.name ?? '',
+            value: product?.id?.toString() ?? ''
+        }))
     }))
 
     return formattedMaterials

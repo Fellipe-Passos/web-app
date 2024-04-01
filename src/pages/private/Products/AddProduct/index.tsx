@@ -1,32 +1,59 @@
 import {
+  ActionIcon,
   Box,
   Button,
+  Group,
+  Modal,
   Select,
   SimpleGrid,
   Stack,
   TextInput,
+  Tooltip,
 } from "@mantine/core";
 import { useForm, yupResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { NumericFormat } from "react-number-format";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
-import { Check, X } from "tabler-icons-react";
+import { Check, Plus, X } from "tabler-icons-react";
 import { removeCurrencyMask } from "../../../../utils";
 import {
+  CreateCategory,
+  InventoryEnum,
+  categoriesToSelect,
   createProduct,
   getProduct,
   inventoryToSelect,
+  listCategories,
   updateProduct,
 } from "./index.service";
 import { productSchema, productSchemaInitialValues } from "./schema";
+import {
+  getClientsToSelect,
+  listClients,
+} from "../../Orders/NewOrder/services/clients.service";
+import { useDisclosure } from "@mantine/hooks";
+import {
+  categorySchema,
+  categorySchemaInitialValues,
+} from "./schema/categoryForm";
 
 export default function AddProduct() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { productId } = useParams();
   const { mutate, isLoading } = useMutation(createProduct);
   const { mutate: updateMutate, isLoading: updateIsLoading } =
     useMutation(updateProduct);
+
+  const { mutate: createCategoryMutate, isLoading: createCategoryIsLoading } =
+    useMutation(CreateCategory);
+
+  const [opened, { close, open }] = useDisclosure();
+
+  const { data: clientsData } = useQuery("list-clients", listClients);
+
+  const { data: categoriesData } = useQuery("list-categories", listCategories);
 
   useQuery("get-product", () => getProduct(productId as string), {
     enabled: Boolean(productId),
@@ -38,6 +65,7 @@ export default function AddProduct() {
           price: data?.price,
           qtd: data?.qtd ?? "0",
           table: data?.table,
+          categoryId: data?.categoryId?.toString(),
         });
       }
     },
@@ -50,19 +78,31 @@ export default function AddProduct() {
     validateInputOnChange: true,
   });
 
+  const categoryForm = useForm({
+    validate: yupResolver(categorySchema),
+    initialValues: categorySchemaInitialValues,
+    validateInputOnBlur: true,
+    validateInputOnChange: true,
+  });
+
   const onSubmit = (): void => {
     const { hasErrors } = form.validate();
 
     if (hasErrors) return;
 
     if (!productId) {
-      const dataToSend = {
+      const dataToSend: any = {
         name: form.values.name,
         price: removeCurrencyMask(form.values.price)?.toString(),
         brand: form.values.brand,
         qtd: Number(form.values.qtd),
         table: form.values.table,
+        categoryId: Number(form.values.categoryId),
       };
+
+      if (form.values.clientId && form.values.table === InventoryEnum.Clients) {
+        dataToSend.clientId = Number(form.values.clientId);
+      }
 
       mutate(dataToSend, {
         onSuccess() {
@@ -114,14 +154,19 @@ export default function AddProduct() {
         },
       });
     } else {
-      const dataToSend = {
+      const dataToSend: any = {
         name: form.values.name,
         price: removeCurrencyMask(form.values.price)?.toString(),
         brand: form.values.brand,
         productId: productId as string,
         qtd: Number(form.values.qtd),
         table: form.values.table,
+        categoryId: Number(form.values.categoryId),
       };
+
+      if (form.values.clientId && form.values.table === InventoryEnum.Clients) {
+        dataToSend.clientId = Number(form.values.clientId);
+      }
 
       updateMutate(dataToSend, {
         onSuccess() {
@@ -175,11 +220,51 @@ export default function AddProduct() {
     }
   };
 
+  const onCreateCategory = () => {
+    createCategoryMutate(
+      { category: categoryForm.values.category },
+      {
+        onSuccess() {
+          queryClient.invalidateQueries(["list-categories"]);
+        },
+      }
+    );
+  };
+
   return (
     <Stack>
       <Box style={{ padding: "1.5rem 2rem" }}>
-        <Stack w={"90%"} mt={"4rem"} style={{ gap: "1.5rem" }}>
-          <SimpleGrid cols={5}>
+        <Stack w={"100%"} mt={"4rem"} style={{ gap: "1.5rem" }}>
+          <Group>
+            <Select
+              searchable
+              clearable
+              label="Tabela"
+              data={inventoryToSelect()}
+              {...form.getInputProps("table")}
+            />
+            <Group align="end">
+              <Select
+                searchable
+                clearable
+                label="Categoria"
+                data={categoriesToSelect(categoriesData as any[] | undefined)}
+                {...form.getInputProps("categoryId")}
+              />
+              <Tooltip label="Adicionar nova categoria">
+                <ActionIcon onClick={open}>
+                  <Plus />
+                </ActionIcon>
+              </Tooltip>
+            </Group>
+            {form.values.table === InventoryEnum.Clients && (
+              <Select
+                label="Cliente"
+                data={getClientsToSelect(clientsData)}
+                {...form.getInputProps("clientId")}
+              />
+            )}
+
             <TextInput label="Marca" {...form.getInputProps("brand")} />
             <TextInput
               label="Nome do material"
@@ -200,12 +285,7 @@ export default function AddProduct() {
               label="Quantidade em estoque"
               {...form.getInputProps("qtd")}
             />
-            <Select
-              label="Tabela"
-              data={inventoryToSelect()}
-              {...form.getInputProps("table")}
-            />
-          </SimpleGrid>
+          </Group>
           <SimpleGrid cols={2} mt={"2rem"}>
             <Button
               variant="outline"
@@ -220,6 +300,34 @@ export default function AddProduct() {
           </SimpleGrid>
         </Stack>
       </Box>
+      <Modal
+        centered
+        opened={opened}
+        onClose={close}
+        title="Adicionar nova categoria"
+      >
+        <Stack>
+          <TextInput
+            label="Categoria"
+            {...categoryForm.getInputProps("category")}
+          />
+          <Group justify="space-between">
+            <Button
+              loading={createCategoryIsLoading}
+              variant="outline"
+              onClick={close}
+            >
+              Cancelar
+            </Button>
+            <Button
+              loading={createCategoryIsLoading}
+              onClick={onCreateCategory}
+            >
+              Salvar
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Stack>
   );
 }
