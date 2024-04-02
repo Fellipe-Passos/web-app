@@ -225,7 +225,7 @@ function Ranking() {
       </Stack>
 
       <Stack h={"47.5vh"}>
-        <SimpleGrid cols={4} h={"40vh"}>
+        <SimpleGrid cols={5} h={"40vh"}>
           {rankings?.PLASTER?.length ? (
             <Paper shadow="xl" h={"100%"} p={"1rem"}>
               <BarChart data={rankings?.PLASTER} title="Gesso" />
@@ -281,6 +281,20 @@ function Ranking() {
               <Loading />
             </Paper>
           )}
+
+          {rankings?.READJUSTMENT?.length ? (
+            <Paper shadow="xl" h={"100%"} p={"1rem"}>
+              <BarChart data={rankings?.READJUSTMENT} title="Reajuste" />
+            </Paper>
+          ) : !rankings?.READJUSTMENT?.length && !rankingIsLoading ? (
+            <Paper shadow="xl" h={"100%"}>
+              <NoData />
+            </Paper>
+          ) : (
+            <Paper shadow="xl" h={"100%"}>
+              <Loading />
+            </Paper>
+          )}
         </SimpleGrid>
       </Stack>
       <Modal
@@ -304,6 +318,7 @@ function Ranking() {
                 <Table.Tr>
                   <Table.Th>Pedido</Table.Th>
                   <Table.Th>Cliente</Table.Th>
+                  <Table.Th>Paciente</Table.Th>
                   <Table.Th>Descrição</Table.Th>
                   <Table.Th>Prazo</Table.Th>
                 </Table.Tr>
@@ -347,6 +362,7 @@ function Ranking() {
                       <Table.Tr key={index}>
                         <Table.Td>{order?.orderId}</Table.Td>
                         <Table.Td>{order?.order?.client?.name}</Table.Td>
+                        <Table.Td>{order?.order?.patientName ?? "-"}</Table.Td>
                         <Table.Td>
                           {order?.order?.services?.length
                             ? `${order?.order?.services[0]?.amount} ${order?.order?.services[0]?.service?.name}...`

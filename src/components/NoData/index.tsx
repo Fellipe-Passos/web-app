@@ -16,7 +16,14 @@ export default function NoData() {
     >
       <Stack align="center">
         <MoodConfuzed color={colors.main[4]} width={"4rem"} height={"4rem"} />
-        <Title order={6} style={{ fontFamily: "Rubik", color: colors.main[4] }}>
+        <Title
+          order={6}
+          style={{
+            fontFamily: "Rubik",
+            color: colors.main[4],
+            textAlign: "center",
+          }}
+        >
           Não existem dados disponíveis para exibição no momento.
         </Title>
       </Stack>

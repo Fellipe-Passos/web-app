@@ -1,12 +1,14 @@
 import {
   Accordion,
   ActionIcon,
+  Box,
   Button,
   Group,
   Modal,
   Select,
   Stack,
   Table,
+  Text,
   TextInput,
   Tooltip,
 } from "@mantine/core";
@@ -48,21 +50,55 @@ export default function ProductsDashboard() {
     validateInputOnChange: true,
   });
 
-  const productsToSelect = (): Array<{ value: string; label: string }> => {
-    if (!data?.length) return [];
+  const productsToSelect = (): Array<{
+    group: string;
+    items: Array<{ value: string; label: string }>;
+  }> => {
+    if (!data || !data.length) return [];
 
-    return data?.map((product) => {
+    return data.map((category: any) => {
       return {
-        value: product?.id?.toString() ?? "-",
-        label: product?.name ?? "-",
+        group: category?.category,
+        items: category?.products?.map((product: any) => ({
+          label: product?.name ?? "-",
+          value: product?.id?.toString() ?? "-",
+        })),
       };
     });
   };
 
   const onDiscountProduct = (): void => {
-    const product = data?.find(
-      (p) => Number(p?.id) === Number(inputManualForm?.values?.productId)
-    );
+    const product = data
+      ?.flatMap((category: any) => category.products ?? [])
+      ?.find(
+        (product: any) =>
+          product.id === Number(inputManualForm?.values?.productId)
+      );
+
+    if (!product) {
+      notifications.show({
+        title: "Não foi possível encontrar o pedido",
+        message: "Ocorreu um erro ao buscar o pedido.",
+        color: "red",
+        icon: <X />,
+        styles: (theme) => ({
+          root: {
+            backgroundColor: theme.colors.red[0],
+            borderColor: theme.colors.red[6],
+
+            "&::before": { backgroundColor: theme.white },
+          },
+
+          title: { color: theme.colors.red[6] },
+          description: { color: theme.colors.red[6] },
+          closeButton: {
+            color: theme.colors.red[6],
+            "&:hover": { backgroundColor: theme.colors.red[1] },
+          },
+        }),
+      });
+      return;
+    }
 
     const dataToSend = {
       productId: inputManualForm.values.productId,
@@ -128,7 +164,7 @@ export default function ProductsDashboard() {
   };
 
   return (
-    <Stack style={{ overflow: "hidden" }}>
+    <Stack h={"100%"} style={{ overflow: "auto" }}>
       <Group justify="space-between">
         <div />
         <Tabs
@@ -152,154 +188,106 @@ export default function ProductsDashboard() {
         </Button>
       </Group>
 
-      <Accordion>
-        {data?.map((category: any, index: number) => (
-          <Accordion.Item key={index} value={category?.id?.toString()}>
-            <Accordion.Control>{category?.category}</Accordion.Control>
-            <Accordion.Panel>
-              <Table.ScrollContainer minWidth={"100%"}>
-                <Table striped>
-                  <Table.Thead>
-                    <Table.Tr>
-                      {activeTab === InventoryEnum.Clients && (
-                        <Table.Th>Cliente</Table.Th>
-                      )}
-                      <Table.Th>Marca</Table.Th>
-                      <Table.Th>Nome</Table.Th>
-                      <Table.Th>Preço</Table.Th>
-                      <Table.Th>Qtd. Estoque</Table.Th>
-                      <Table.Th>Ações</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {category?.products?.map((product: any) => (
-                      <Table.Tr key={product?.id}>
-                        {activeTab === InventoryEnum.Clients && (
-                          <Table.Td>{product?.client?.name ?? "-"}</Table.Td>
-                        )}
-                        <Table.Td>{product?.brand ?? "-"}</Table.Td>
-                        <Table.Td style={{ paddingLeft: "1rem" }}>
-                          {product?.name ?? "-"}
-                        </Table.Td>
-                        <Table.Td>{formatCurrency(product?.price)}</Table.Td>
-                        <Table.Td>{product?.qtd ?? 0}</Table.Td>
-                        <Table.Td>
-                          <Group>
-                            <Tooltip label="Editar">
-                              <ActionIcon
-                                color="blue"
-                                radius={"xl"}
-                                onClick={() =>
-                                  navigate(`/edit-product/${product?.id}`)
-                                }
-                              >
-                                <Pencil />
-                              </ActionIcon>
-                            </Tooltip>
-                            {[
-                              InventoryEnum.NonDental,
-                              InventoryEnum.RawMaterials,
-                            ]?.includes(activeTab) && (
-                              <Tooltip label="Reportar saída manualmente">
-                                <ActionIcon
-                                  color="green"
-                                  onClick={() => {
-                                    open();
-                                    inputManualForm.setFieldValue(
-                                      "productId",
-                                      product?.id?.toString()
-                                    );
-                                  }}
-                                >
-                                  <Report />
-                                </ActionIcon>
-                              </Tooltip>
+      <Box mah={"100%"} style={{ overflow: "auto" }}>
+        <Accordion>
+          {data?.map((category: any, index: number) => (
+            <Accordion.Item key={index} value={category?.id?.toString()}>
+              <Accordion.Control>
+                <Group justify="space-between">
+                  <Text fw={700}>{`Categoria: ${category?.category}`}</Text>
+                  <Text mr={"1rem"}>Clique para visualizar produtos</Text>
+                </Group>
+              </Accordion.Control>
+              <Accordion.Panel
+                mah={"50vh"}
+                style={{
+                  overflow: "auto",
+                }}
+              >
+                {category?.products?.length ? (
+                  <Table.ScrollContainer minWidth={"100%"}>
+                    <Table striped>
+                      <Table.Thead>
+                        <Table.Tr>
+                          <Table.Th>Categoria</Table.Th>
+                          {activeTab === InventoryEnum.Clients && (
+                            <Table.Th>Cliente</Table.Th>
+                          )}
+                          <Table.Th>Marca</Table.Th>
+                          <Table.Th>Nome</Table.Th>
+                          <Table.Th>Preço</Table.Th>
+                          <Table.Th>Qtd. Estoque</Table.Th>
+                          <Table.Th>Ações</Table.Th>
+                        </Table.Tr>
+                      </Table.Thead>
+                      <Table.Tbody>
+                        {category?.products?.map((product: any) => (
+                          <Table.Tr key={product?.id}>
+                            <Table.Td>{category?.category ?? "-"}</Table.Td>
+                            {activeTab === InventoryEnum.Clients && (
+                              <Table.Td>
+                                {product?.client?.name ?? "-"}
+                              </Table.Td>
                             )}
-                            <Tooltip label="Excluir">
-                              <ActionIcon>
-                                <Trash />
-                              </ActionIcon>
-                            </Tooltip>
-                          </Group>
-                        </Table.Td>
-                      </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
-              </Table.ScrollContainer>
-            </Accordion.Panel>
-          </Accordion.Item>
-        ))}
-      </Accordion>
-
-      {/* <Table.ScrollContainer minWidth={"100%"}>
-        <Table striped>
-          <Table.Thead>
-            <Table.Tr>
-              {activeTab === InventoryEnum.Clients && (
-                <Table.Th>Cliente</Table.Th>
-              )}
-              <Table.Th>Marca</Table.Th>
-              <Table.Th>Nome</Table.Th>
-              <Table.Th>Preço</Table.Th>
-              <Table.Th>Qtd. Estoque</Table.Th>
-              <Table.Th>Ações</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {data?.map((user, index) => (
-              <Table.Tr key={index}>
-                {activeTab === InventoryEnum.Clients && (
-                  <Table.Td>{user?.client?.name ?? "-"}</Table.Td>
-                )}
-                <Table.Td>{user?.brand ?? "-"}</Table.Td>
-                <Table.Td style={{ paddingLeft: "1rem" }}>
-                  {user?.name ?? "-"}
-                </Table.Td>
-                <Table.Td>{formatCurrency(user?.price)}</Table.Td>
-                <Table.Td>{user?.qtd ?? 0}</Table.Td>
-                <Table.Td>
-                  <Group>
-                    <Tooltip label="Editar">
-                      <ActionIcon
-                        color="blue"
-                        radius={"xl"}
-                        onClick={() => navigate(`/edit-product/${user?.id}`)}
-                      >
-                        <Pencil />
-                      </ActionIcon>
-                    </Tooltip>
-                    {[
-                      InventoryEnum.NonDental,
-                      InventoryEnum.RawMaterials,
-                    ]?.includes(activeTab) && (
-                      <Tooltip label="Reportar saída manualmente">
-                        <ActionIcon
-                          color="green"
-                          onClick={() => {
-                            open();
-                            inputManualForm.setFieldValue(
-                              "productId",
-                              user?.id?.toString()
-                            );
-                          }}
-                        >
-                          <Report />
-                        </ActionIcon>
-                      </Tooltip>
-                    )}
-                    <Tooltip label="Excluir">
-                      <ActionIcon>
-                        <Trash />
-                      </ActionIcon>
-                    </Tooltip>
-                  </Group>
-                </Table.Td>
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
-      </Table.ScrollContainer> */}
+                            <Table.Td>{product?.brand ?? "-"}</Table.Td>
+                            <Table.Td style={{ paddingLeft: "1rem" }}>
+                              {product?.name ?? "-"}
+                            </Table.Td>
+                            <Table.Td>
+                              {formatCurrency(product?.price)}
+                            </Table.Td>
+                            <Table.Td>{product?.qtd ?? 0}</Table.Td>
+                            <Table.Td>
+                              <Group>
+                                <Tooltip label="Editar">
+                                  <ActionIcon
+                                    color="blue"
+                                    radius={"xl"}
+                                    onClick={() =>
+                                      navigate(`/edit-product/${product?.id}`)
+                                    }
+                                  >
+                                    <Pencil />
+                                  </ActionIcon>
+                                </Tooltip>
+                                {[
+                                  InventoryEnum.NonDental,
+                                  InventoryEnum.RawMaterials,
+                                ]?.includes(activeTab) && (
+                                  <Tooltip label="Reportar saída manualmente">
+                                    <ActionIcon
+                                      color="green"
+                                      onClick={() => {
+                                        open();
+                                        inputManualForm.setFieldValue(
+                                          "productId",
+                                          product?.id?.toString()
+                                        );
+                                      }}
+                                    >
+                                      <Report />
+                                    </ActionIcon>
+                                  </Tooltip>
+                                )}
+                                <Tooltip label="Excluir">
+                                  <ActionIcon>
+                                    <Trash />
+                                  </ActionIcon>
+                                </Tooltip>
+                              </Group>
+                            </Table.Td>
+                          </Table.Tr>
+                        ))}
+                      </Table.Tbody>
+                    </Table>
+                  </Table.ScrollContainer>
+                ) : null}
+                {!category?.products?.length && <NoData />}
+              </Accordion.Panel>
+            </Accordion.Item>
+          ))}
+        </Accordion>
+      </Box>
 
       {!data?.length && !isLoading && <NoData />}
       {!data?.length && isLoading && <Loading />}

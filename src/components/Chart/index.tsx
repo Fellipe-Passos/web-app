@@ -25,6 +25,7 @@ function ApexChart({ data, title }: ApexChartProps) {
         name: "Entregas",
         data: values,
         color: colors.main[4],
+        width: 16,
       },
     ],
     options: {
