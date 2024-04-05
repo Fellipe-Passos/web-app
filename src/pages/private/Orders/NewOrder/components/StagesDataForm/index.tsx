@@ -441,6 +441,8 @@ export default function StagesDataForm({ orderData }: StepsFormProps) {
                           UserRoles?.Manager,
                           UserRoles.Ceo,
                           UserRoles.Root,
+                          UserRoles.Administration,
+                          UserRoles.ScreeningAdministration,
                         ]?.includes(userRole as UserRoles)
                           ? "block"
                           : "none"
