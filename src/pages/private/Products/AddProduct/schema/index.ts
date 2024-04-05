@@ -13,6 +13,8 @@ export const productSchema = Yup.object().shape({
         .required('O campo é obrigatório.'),
     qtd: Yup.string()
         .required('O campo é obrigatório.'),
+    minimumQuantity: Yup.string()
+        .required('O campo é obrigatório.'),
     table: Yup.string()
         .required('O campo é obrigatório.'),
 
@@ -29,5 +31,6 @@ export const productSchemaInitialValues = {
     qtd: '',
     table: '',
     clientId: undefined,
-    categoryId: undefined
+    categoryId: undefined,
+    minimumQuantity: ''
 }

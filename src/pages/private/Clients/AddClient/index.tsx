@@ -26,6 +26,7 @@ import {
   updateClient,
 } from "./index.service";
 import { clientSchema, clientSchemaInitialValues } from "./schema";
+import { DateInput } from "@mantine/dates";
 
 export default function AddClient() {
   const navigate = useNavigate();
@@ -64,6 +65,9 @@ export default function AddClient() {
               : "PJ"
             : "PF",
           orderCollection: Boolean(data?.orderCollection),
+          dateOfBirth: data?.dateOfBirth
+            ? (new Date(data?.dateOfBirth) as any)
+            : undefined,
         });
       }
     },
@@ -79,6 +83,9 @@ export default function AddClient() {
         name: form.values.name,
         orderCollection: Boolean(form.values.orderCollection),
         phone: `55${removeCPFMask(form.values.phone)}`,
+        dateOfBirth: form.values.dateOfBirth
+          ? new Date(form.values.dateOfBirth)?.toISOString()
+          : null,
         cro: form.values.cro,
         city: form.values.city,
         district: form.values.district,
@@ -145,6 +152,9 @@ export default function AddClient() {
         name: form.values.name,
         orderCollection: Boolean(form.values.orderCollection),
         phone: `55${removeCPFMask(form.values.phone)}`,
+        dateOfBirth: form.values.dateOfBirth
+          ? new Date(form.values.dateOfBirth)?.toISOString()
+          : null,
         cro: form.values.cro,
         city: form.values.city,
         district: form.values.district,
@@ -281,7 +291,7 @@ export default function AddClient() {
                 {...form.getInputProps("phone")}
               />
             </SimpleGrid>
-            <SimpleGrid cols={3}>
+            <SimpleGrid cols={4}>
               <Radio.Group
                 label="Tipo de cliente"
                 {...form.getInputProps("clientType")}
@@ -301,6 +311,13 @@ export default function AddClient() {
                 label={form.values?.clientType === "PF" ? "CPF" : "CNPJ"}
                 mask={"_"}
                 {...form.getInputProps("CPF")}
+              />
+              <DateInput
+                label="Data de nascimento"
+                valueFormat="DD/MM/YYYY"
+                locale="pt-BR"
+                clearable
+                {...form.getInputProps("dateOfBirth")}
               />
               <TextInput
                 type="email"

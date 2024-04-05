@@ -69,6 +69,7 @@ export default function ClientsDashboard() {
             <Table.Tr>
               <Table.Th>Id Cliente</Table.Th>
               <Table.Th>Nome</Table.Th>
+              <Table.Th>Data nascimento</Table.Th>
               <Table.Th>Telefone</Table.Th>
               <Table.Th>CPF/CNPJ</Table.Th>
               <Table.Th>Senha plataforma</Table.Th>
@@ -93,6 +94,11 @@ export default function ClientsDashboard() {
                 <Table.Tr key={index}>
                   <Table.Td>{user?.id ?? "-"}</Table.Td>
                   <Table.Td>{user?.name ?? "-"}</Table.Td>
+                  <Table.Td>
+                    {user?.dateOfBirth
+                      ? new Date(user?.dateOfBirth)?.toLocaleDateString("pt-br")
+                      : "-"}
+                  </Table.Td>
                   <Table.Td>
                     {humanizeCellphone(user?.phone?.replace("5582", "829"))}
                   </Table.Td>

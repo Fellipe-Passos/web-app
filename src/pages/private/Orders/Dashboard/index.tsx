@@ -319,7 +319,9 @@ export default function OrdersDashboard(): JSX.Element {
           </Table.Td>
           <Table.Td>{order?.client?.name ?? "-"}</Table.Td>
           <Table.Td>{order?.patientName ?? "-"}</Table.Td>
-          <Table.Td>{formatCurrency(order?.price ?? 0)}</Table.Td>
+          {[UserRoles.Ceo, UserRoles.Root]?.includes(userRole as UserRoles) && (
+            <Table.Td>{formatCurrency(order?.price ?? 0)}</Table.Td>
+          )}
           <Table.Td>
             <Badge color={badge?.color}>{badge?.text}</Badge>
           </Table.Td>
@@ -493,7 +495,7 @@ export default function OrdersDashboard(): JSX.Element {
           <Table.ScrollContainer minWidth={"100%"}>
             <Table striped highlightOnHover withTableBorder withColumnBorders>
               <Table.Thead>
-                {header.map((h) => (
+                {header(userRole as UserRoles)?.map((h) => (
                   <Table.Th key={h}>{h}</Table.Th>
                 ))}
               </Table.Thead>

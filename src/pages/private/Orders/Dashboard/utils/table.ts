@@ -1,16 +1,30 @@
 import { UserRoles } from "../../../../../types/user";
 import { translateRole } from "../../../../../utils";
 
-export const header = [
-    "Id",
-    "Data",
-    "Atraso",
-    "Cliente",
-    "Paciente",
-    "Valor",
-    "Status",
-    "Ações",
-];
+export const header = (userRole: UserRoles): string[] => {
+    if ([UserRoles.Ceo, UserRoles.Root]?.includes(userRole)) {
+        return [
+            "Id",
+            "Data",
+            "Atraso",
+            "Cliente",
+            "Paciente",
+            "Valor",
+            "Status",
+            "Ações",
+        ]
+    }
+
+    return [
+        "Id",
+        "Data",
+        "Atraso",
+        "Cliente",
+        "Paciente",
+        "Status",
+        "Ações",
+    ]
+};
 
 
 interface GetStatusProps {

@@ -1,6 +1,7 @@
 import {
   Accordion,
   ActionIcon,
+  Badge,
   Box,
   Button,
   Group,
@@ -216,68 +217,100 @@ export default function ProductsDashboard() {
                           <Table.Th>Marca</Table.Th>
                           <Table.Th>Nome</Table.Th>
                           <Table.Th>Preço</Table.Th>
+                          <Table.Th>Qtd. Mínima</Table.Th>
                           <Table.Th>Qtd. Estoque</Table.Th>
                           <Table.Th>Ações</Table.Th>
                         </Table.Tr>
                       </Table.Thead>
                       <Table.Tbody>
-                        {category?.products?.map((product: any) => (
-                          <Table.Tr key={product?.id}>
-                            <Table.Td>{category?.category ?? "-"}</Table.Td>
-                            {activeTab === InventoryEnum.Clients && (
-                              <Table.Td>
-                                {product?.client?.name ?? "-"}
+                        {category?.products?.map((product: any) => {
+                          const difference =
+                            product.qtd - product.minimumQuantity;
+
+                          const percentage =
+                            (difference / product.minimumQuantity) * 100;
+
+                          let badgeColorByPercentage = "grey";
+
+                          if (percentage >= 50) {
+                            badgeColorByPercentage = "teal";
+                          } else if (percentage < 50 && percentage >= 25) {
+                            badgeColorByPercentage = "yellow";
+                          } else if (percentage < 25 && percentage >= 10) {
+                            badgeColorByPercentage = "orange";
+                          } else {
+                            badgeColorByPercentage = "red";
+                          }
+
+                          return (
+                            <Table.Tr key={product?.id}>
+                              <Table.Td>{category?.category ?? "-"}</Table.Td>
+                              {activeTab === InventoryEnum.Clients && (
+                                <Table.Td>
+                                  {product?.client?.name ?? "-"}
+                                </Table.Td>
+                              )}
+                              <Table.Td>{product?.brand ?? "-"}</Table.Td>
+                              <Table.Td style={{ paddingLeft: "1rem" }}>
+                                {product?.name ?? "-"}
                               </Table.Td>
-                            )}
-                            <Table.Td>{product?.brand ?? "-"}</Table.Td>
-                            <Table.Td style={{ paddingLeft: "1rem" }}>
-                              {product?.name ?? "-"}
-                            </Table.Td>
-                            <Table.Td>
-                              {formatCurrency(product?.price)}
-                            </Table.Td>
-                            <Table.Td>{product?.qtd ?? 0}</Table.Td>
-                            <Table.Td>
-                              <Group>
-                                <Tooltip label="Editar">
-                                  <ActionIcon
-                                    color="blue"
-                                    radius={"xl"}
-                                    onClick={() =>
-                                      navigate(`/edit-product/${product?.id}`)
-                                    }
-                                  >
-                                    <Pencil />
-                                  </ActionIcon>
-                                </Tooltip>
-                                {[
-                                  InventoryEnum.NonDental,
-                                  InventoryEnum.RawMaterials,
-                                ]?.includes(activeTab) && (
-                                  <Tooltip label="Reportar saída manualmente">
+                              <Table.Td>
+                                {formatCurrency(product?.price)}
+                              </Table.Td>
+                              <Table.Td>
+                                {product?.minimumQuantity ?? 0}
+                              </Table.Td>
+                              <Table.Td>
+                                <Badge
+                                  color={badgeColorByPercentage}
+                                  variant="light"
+                                >
+                                  {product?.qtd ?? 0}
+                                </Badge>
+                              </Table.Td>
+
+                              <Table.Td>
+                                <Group>
+                                  <Tooltip label="Editar">
                                     <ActionIcon
-                                      color="green"
-                                      onClick={() => {
-                                        open();
-                                        inputManualForm.setFieldValue(
-                                          "productId",
-                                          product?.id?.toString()
-                                        );
-                                      }}
+                                      color="blue"
+                                      radius={"xl"}
+                                      onClick={() =>
+                                        navigate(`/edit-product/${product?.id}`)
+                                      }
                                     >
-                                      <Report />
+                                      <Pencil />
                                     </ActionIcon>
                                   </Tooltip>
-                                )}
-                                <Tooltip label="Excluir">
-                                  <ActionIcon>
-                                    <Trash />
-                                  </ActionIcon>
-                                </Tooltip>
-                              </Group>
-                            </Table.Td>
-                          </Table.Tr>
-                        ))}
+                                  {[
+                                    InventoryEnum.NonDental,
+                                    InventoryEnum.RawMaterials,
+                                  ]?.includes(activeTab) && (
+                                    <Tooltip label="Reportar saída manualmente">
+                                      <ActionIcon
+                                        color="green"
+                                        onClick={() => {
+                                          open();
+                                          inputManualForm.setFieldValue(
+                                            "productId",
+                                            product?.id?.toString()
+                                          );
+                                        }}
+                                      >
+                                        <Report />
+                                      </ActionIcon>
+                                    </Tooltip>
+                                  )}
+                                  <Tooltip label="Excluir">
+                                    <ActionIcon>
+                                      <Trash />
+                                    </ActionIcon>
+                                  </Tooltip>
+                                </Group>
+                              </Table.Td>
+                            </Table.Tr>
+                          );
+                        })}
                       </Table.Tbody>
                     </Table>
                   </Table.ScrollContainer>

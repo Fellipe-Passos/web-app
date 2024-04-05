@@ -47,6 +47,8 @@ export default function Expenses() {
     isLoading: expensesIsLoading,
   } = useMutation(ListExpenses);
 
+  console.log(expenses);
+
   const { mutate, isLoading } = useMutation(PayExpense);
 
   const { data: history, mutate: getHistory } = useMutation(GetHistory);

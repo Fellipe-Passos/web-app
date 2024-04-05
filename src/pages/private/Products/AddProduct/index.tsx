@@ -66,6 +66,7 @@ export default function AddProduct() {
           qtd: data?.qtd ?? "0",
           table: data?.table,
           categoryId: data?.categoryId?.toString(),
+          minimumQuantity: data?.minimumQuantity ?? "0",
         });
       }
     },
@@ -96,6 +97,7 @@ export default function AddProduct() {
         price: removeCurrencyMask(form.values.price)?.toString(),
         brand: form.values.brand,
         qtd: Number(form.values.qtd),
+        minimumQuantity: Number(form.values.minimumQuantity ?? 0),
         table: form.values.table,
         categoryId: Number(form.values.categoryId),
       };
@@ -159,6 +161,7 @@ export default function AddProduct() {
         price: removeCurrencyMask(form.values.price)?.toString(),
         brand: form.values.brand,
         productId: productId as string,
+        minimumQuantity: Number(form.values.minimumQuantity ?? 0),
         qtd: Number(form.values.qtd),
         table: form.values.table,
         categoryId: Number(form.values.categoryId),
@@ -280,6 +283,10 @@ export default function AddProduct() {
               customInput={TextInput}
               label="Valor do material"
               {...form.getInputProps("price")}
+            />
+            <TextInput
+              label="Quantidade mínima"
+              {...form.getInputProps("minimumQuantity")}
             />
             <TextInput
               label="Quantidade em estoque"

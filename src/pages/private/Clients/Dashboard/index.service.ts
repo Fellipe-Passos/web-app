@@ -8,6 +8,7 @@ interface Client {
     CPF: string
     orderCollection: boolean
     password?: string
+    dateOfBirth?: Date | string | null
 }
 
 export async function listClients(search?: string): Promise<Client[] | null | undefined> {
