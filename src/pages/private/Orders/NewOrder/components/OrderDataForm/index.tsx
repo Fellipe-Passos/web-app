@@ -88,8 +88,6 @@ export default function OrderDataForm({
     listMaterials()
   );
 
-  console.log(materialsData);
-
   const { data: servicesData } = useQuery("list-services", listServices);
 
   const getSelectedService = (value: number) => {
@@ -99,9 +97,15 @@ export default function OrderDataForm({
   };
 
   const getSelectedProduct = (value: number) => {
-    const service = materialsData?.find((s) => Number(s?.id) === Number(value));
-
-    return service?.name ?? "-";
+    for (const material of materialsData ?? []) {
+      const product = material?.products?.find(
+        (p: any) => Number(p.id) === Number(value)
+      );
+      if (product) {
+        return product.name;
+      }
+    }
+    return "-";
   };
 
   const addService = (): void => {
