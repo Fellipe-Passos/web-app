@@ -275,7 +275,12 @@ export default function Reports(): JSX.Element {
 
   return (
     <Stack h={"100%"}>
-      {[UserRoles.Ceo, UserRoles.Root]?.includes(userRole as UserRoles) && (
+      {[
+        UserRoles.Ceo,
+        UserRoles.Root,
+        UserRoles.Administration,
+        UserRoles.ScreeningAdministration,
+      ]?.includes(userRole as UserRoles) && (
         <>
           <Stack>
             <Text>Emitir relatório de produção</Text>
