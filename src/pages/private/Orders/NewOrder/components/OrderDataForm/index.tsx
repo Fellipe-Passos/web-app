@@ -49,13 +49,14 @@ export default function OrderDataForm({
   const { orderId } = useParams();
 
   useEffect(() => {
-    const materialsSendedByClient = undefined;
+    let materialsSendedByClient = undefined;
 
     if (orderData?.materialsSendedByClient) {
       if (typeof orderData?.materialsSendedByClient === "string") {
-        orderData?.materialsSendedByClient?.split(", ");
+        materialsSendedByClient =
+          orderData?.materialsSendedByClient?.split(", ");
       } else {
-        orderData?.materialsSendedByClient;
+        materialsSendedByClient = orderData?.materialsSendedByClient;
       }
     }
 
