@@ -1,3 +1,4 @@
+import Chart from "../../pages/private/Chart";
 import AddClient from "../../pages/private/Clients/AddClient";
 import ClientsDashboard from "../../pages/private/Clients/Dashboard";
 import Collections from "../../pages/private/Collections/Dashboard";
@@ -178,6 +179,13 @@ export const homeRoutes: RoutesType[] = [
     path: "/collections",
     element: <Collections />,
     title: "Histórico de cobranças",
+    returnButton: true,
+  },
+  {
+    isPrivate: true,
+    path: "/chart",
+    element: <Chart />,
+    title: "Gráfico de faturamento anual",
     returnButton: true,
   },
 ];

@@ -1,4 +1,4 @@
-import { Adjustments, Box, BrandWhatsapp, Briefcase, Checklist, DeviceTv, Moneybag, PigMoney, Report, ReportMoney, Tools, User, Users, ZoomMoney } from "tabler-icons-react";
+import { Adjustments, Analyze, Box, BrandWhatsapp, Briefcase, ChartBar, Checklist, DeviceTv, Moneybag, PigMoney, Report, ReportMoney, Tools, User, Users, ZoomMoney } from "tabler-icons-react";
 import { UserRoles } from "../../../types/user";
 
 export const navbarOptions = (userRole: UserRoles): any[] => {
@@ -36,6 +36,7 @@ export const navbarOptions = (userRole: UserRoles): any[] => {
                         URL: "/expenses",
                         icon: Checklist
                     },
+
                 ]
             },
             {
@@ -345,6 +346,11 @@ export const navbarOptions = (userRole: UserRoles): any[] => {
                         text: "Despesas",
                         URL: "/expenses",
                         icon: Checklist
+                    },
+                    {
+                        text: "Gráfico",
+                        URL: "/chart",
+                        icon: ChartBar
                     },
                 ]
             },
