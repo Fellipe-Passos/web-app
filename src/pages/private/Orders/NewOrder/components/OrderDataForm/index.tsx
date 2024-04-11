@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { useEffect } from "react";
-import { useQuery } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import { useParams } from "react-router-dom";
 import { Trash } from "tabler-icons-react";
 import NoData from "../../../../../../components/NoData";
@@ -47,6 +47,7 @@ export default function OrderDataForm({
   form,
 }: OrderDataFormProps): JSX.Element {
   const { orderId } = useParams();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     let materialsSendedByClient = undefined;
@@ -88,6 +89,14 @@ export default function OrderDataForm({
   const { data: materialsData } = useQuery("list-materials", () =>
     listMaterials()
   );
+
+  useEffect(() => {
+    if (form.values.clientId) {
+      listMaterials(form.values.clientId).then((data) => {
+        queryClient.setQueryData("list-materials", data);
+      });
+    }
+  }, [form.values.clientId]);
 
   const { data: servicesData } = useQuery("list-services", listServices);
 
