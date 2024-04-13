@@ -54,8 +54,8 @@ const theme = createTheme({
         Table: {
             styles: (theme: { colors: { main: any[]; }; }) => ({
                 thead: {
-                    backgroundColor: theme.colors.main[0],
-                    color: "#FFF",
+                    // backgroundColor: theme.colors.main[0],
+                    color: theme.colors.main[4],
                     textTransform: 'uppercase',
                 },
                 tbody: {

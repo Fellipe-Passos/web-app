@@ -194,7 +194,7 @@ export default function Expenses() {
     });
 
     return (
-      <Table striped>
+      <Table striped withTableBorder withColumnBorders highlightOnHover>
         <Table.Thead>
           <Table.Th>Data do pagamento</Table.Th>
           <Table.Th>Valor do salário</Table.Th>
@@ -266,7 +266,7 @@ export default function Expenses() {
       {expenses?.length && !expensesIsLoading ? (
         <Table.ScrollContainer minWidth={"100%"}>
           {activeTab !== ExpenseEnum.EMPLOYEES && (
-            <Table striped>
+            <Table striped withTableBorder withColumnBorders highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>Criado em</Table.Th>
@@ -354,7 +354,7 @@ export default function Expenses() {
             </Table>
           )}
           {activeTab === ExpenseEnum.EMPLOYEES && (
-            <Table striped>
+            <Table striped withTableBorder withColumnBorders highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>Adicionado em</Table.Th>
@@ -463,7 +463,7 @@ export default function Expenses() {
       >
         <Table.ScrollContainer minWidth={"100%"}>
           {activeTab !== ExpenseEnum.EMPLOYEES && (
-            <Table striped>
+            <Table striped withTableBorder withColumnBorders highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>PAGO EM</Table.Th>

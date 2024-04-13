@@ -44,7 +44,7 @@ export default function PaymentData(): JSX.Element {
     <Stack h={"100%"} mt={"1rem"}>
       {orderPaymentData?.data?.length && !loading ? (
         <Table.ScrollContainer minWidth={"100%"}>
-          <Table striped>
+          <Table striped withTableBorder withColumnBorders highlightOnHover>
             <Table.Thead>
               <Table.Th>Data de vencimento</Table.Th>
               <Table.Th>Nº da parcela</Table.Th>

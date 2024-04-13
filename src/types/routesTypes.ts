@@ -4,4 +4,5 @@ export interface RoutesType {
     element: JSX.Element
     title?: string
     returnButton?: boolean
+    fullScreen?: boolean
 }

@@ -15,7 +15,7 @@ export const transactionSchema = Yup.object().shape({
 
     discount: Yup.string().nullable(),
 
-    orderId: Yup.string().nullable(),
+    orderId: Yup.array().of(Yup.string()).nullable(),
 
     billingType: Yup.string().nullable(),
 
@@ -35,7 +35,7 @@ export const transactionValues = {
     type: TransactionsEnum.DEBT,
     discount: '',
     discountInMoney: '',
-    orderId: undefined,
+    orderId: [],
     billingType: undefined,
     dueDate: undefined,
     installmentCount: undefined,

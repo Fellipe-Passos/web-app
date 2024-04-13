@@ -137,6 +137,15 @@ export const homeRoutes: RoutesType[] = [
     element: <Ranking />,
     title: "Ranking",
     returnButton: true,
+    fullScreen: true,
+  },
+  {
+    isPrivate: false,
+    path: "/ranking/full",
+    element: <Ranking />,
+    title: "Ranking",
+    returnButton: false,
+    fullScreen: false,
   },
   {
     isPrivate: true,

@@ -6,6 +6,7 @@ import {
   Checkbox,
   Group,
   Modal,
+  MultiSelect,
   Radio,
   Select,
   SimpleGrid,
@@ -116,14 +117,13 @@ export default function TransactionsDashboard(): JSX.Element {
     const dataToSend: any = {
       emitCollection: Boolean(emitCollection),
       manualInput: true,
-      value: removeCurrencyMask(value),
+      value: value?.includes("R$") ? removeCurrencyMask(value) : Number(value),
       description,
       clientId: Number(clientId),
       type: type as unknown as TransactionsEnum,
       discount: discount?.trim()?.length ? removeCurrencyMask(discount) : 0,
+      orderId,
     };
-
-    if (orderId) dataToSend.orderId = Number(orderId);
 
     if (billingType)
       dataToSend.billingType = [
@@ -201,17 +201,19 @@ export default function TransactionsDashboard(): JSX.Element {
   );
 
   useEffect(() => {
-    if (form.values?.orderId && ordersData?.orders) {
+    if (Array.isArray(form.values?.orderId) && ordersData?.orders) {
       let totalValue = 0;
 
-      const selectedOrder = ordersData.orders.find(
-        (order: any) => Number(order.id) === Number(form.values.orderId)
-      );
-      if (selectedOrder) {
-        totalValue += Number(selectedOrder.price);
-      }
+      form.values.orderId?.forEach((orderId) => {
+        const selectedOrder = ordersData.orders.find(
+          (order) => Number(order.id) === Number(orderId)
+        );
+        if (selectedOrder) {
+          totalValue += Number(selectedOrder.price);
+        }
+      });
 
-      form.setFieldValue("value", `R$ ${totalValue}`);
+      form.setFieldValue("value", `${totalValue}`);
     }
   }, [form.values.orderId, ordersData?.orders]);
 
@@ -253,7 +255,7 @@ export default function TransactionsDashboard(): JSX.Element {
           {...form.getInputProps("clientId")}
         />
         {form.values.type === TransactionsEnum.CREDIT && (
-          <Select
+          <MultiSelect
             label="Pedido"
             data={getOrdersToSelect(filteredOrders)}
             searchable
@@ -261,6 +263,14 @@ export default function TransactionsDashboard(): JSX.Element {
             withAsterisk
             {...form.getInputProps("orderId")}
           />
+          // <Select
+          //   label="Pedido"
+          //   data={getOrdersToSelect(filteredOrders)}
+          //   searchable
+          //   clearable
+          //   withAsterisk
+          //   {...form.getInputProps("orderId")}
+          // />
         )}
         <SimpleGrid cols={form.values.type === TransactionsEnum.DEBT ? 1 : 3}>
           <NumericFormat
@@ -486,6 +496,7 @@ export default function TransactionsDashboard(): JSX.Element {
     <Stack h="100%">
       <Group justify="flex-end">
         <Button
+          variant="light"
           radius={"xl"}
           leftSection={<ReportMoney />}
           onClick={() =>

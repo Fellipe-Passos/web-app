@@ -55,6 +55,7 @@ export default function ClientsDashboard() {
           UserRoles.Root,
         ]?.includes(userRole as UserRoles) && (
           <Button
+            variant="light"
             leftSection={<UserPlus />}
             onClick={() => navigate("/add-client")}
           >
@@ -64,7 +65,7 @@ export default function ClientsDashboard() {
       </Group>
 
       <Table.ScrollContainer minWidth={"100%"}>
-        <Table striped>
+        <Table striped withTableBorder withColumnBorders highlightOnHover>
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Id Cliente</Table.Th>

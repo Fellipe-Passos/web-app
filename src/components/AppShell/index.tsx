@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Burger,
   Button,
   Group,
@@ -7,10 +8,11 @@ import {
   NavLink,
   Text,
   Title,
+  Tooltip,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Logout } from "tabler-icons-react";
+import { ArrowsMaximize, ChevronLeft, Logout } from "tabler-icons-react";
 import logo from "../../assets/logo.png";
 import { UserRoles } from "../../types/user";
 import classes from "./index.module.css";
@@ -20,9 +22,15 @@ interface AppShellProps {
   pageTitle: string;
   children: JSX.Element;
   returnButton?: boolean;
+  fullScreen?: boolean;
 }
 
-export function AppShell({ children, pageTitle, returnButton }: AppShellProps) {
+export function AppShell({
+  children,
+  pageTitle,
+  returnButton,
+  fullScreen,
+}: AppShellProps) {
   const [opened, { toggle }] = useDisclosure();
   const navigate = useNavigate();
 
@@ -88,17 +96,28 @@ export function AppShell({ children, pageTitle, returnButton }: AppShellProps) {
     >
       <MantineAppShell.Header pl={"md"} pr={"md"} className={classes.header}>
         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-        <Group>
-          {returnButton && (
-            <Button
-              variant="subtle"
-              leftSection={<ChevronLeft />}
-              onClick={() => navigate(-1)}
-            >
-              Voltar
-            </Button>
+        <Group justify="space-between" w={"100%"}>
+          <Group>
+            {returnButton && (
+              <Button
+                variant="subtle"
+                leftSection={<ChevronLeft />}
+                onClick={() => navigate(-1)}
+              >
+                Voltar
+              </Button>
+            )}
+            <Title c={"main.4"}>{pageTitle}</Title>
+          </Group>
+          {fullScreen && (
+            <Tooltip label="Visualizar em tela cheia">
+              <ActionIcon
+                onClick={() => window.open("/ranking/full", "_blank")}
+              >
+                <ArrowsMaximize />
+              </ActionIcon>
+            </Tooltip>
           )}
-          <Title c={"main.4"}>{pageTitle}</Title>
         </Group>
       </MantineAppShell.Header>
 

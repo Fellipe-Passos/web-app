@@ -23,6 +23,7 @@ export default function ViewUsers(): JSX.Element {
     <Stack h={"100%"}>
       <Group justify="flex-end">
         <Button
+          variant="light"
           leftSection={<UserPlus />}
           onClick={() => navigate("/add-user")}
         >
@@ -31,7 +32,7 @@ export default function ViewUsers(): JSX.Element {
       </Group>
 
       <Table.ScrollContainer minWidth={"100%"}>
-        <Table striped>
+        <Table striped withTableBorder withColumnBorders highlightOnHover>
           <Table.Thead>
             <Table.Tr>
               <Table.Th>CPF</Table.Th>

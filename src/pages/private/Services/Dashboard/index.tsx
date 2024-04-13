@@ -22,6 +22,7 @@ export default function ServicesDashboard(): JSX.Element {
     <Stack h={"100%"}>
       <Group justify="flex-end">
         <Button
+          variant="light"
           radius={"xl"}
           leftSection={<UserPlus />}
           onClick={() => navigate("/services")}
@@ -31,7 +32,7 @@ export default function ServicesDashboard(): JSX.Element {
       </Group>
 
       <Table.ScrollContainer minWidth={"100%"}>
-        <Table striped>
+        <Table striped withTableBorder withColumnBorders highlightOnHover>
           <Table.Thead>
             <Table.Tr>
               <Table.Th style={{ paddingLeft: "1rem" }}>Nome</Table.Th>

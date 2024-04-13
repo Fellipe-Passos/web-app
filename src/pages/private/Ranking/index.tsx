@@ -66,20 +66,25 @@ function Ranking() {
 
   return (
     <Stack h={"100%"} p={0} m={0}>
-      <Stack h={"47.5vh"}>
+      <Stack h={"40vh"}>
         <SimpleGrid cols={3}>
-          <Stack h={"47.5vh"} style={{ gap: 0 }}>
+          <Stack h={"40vh"} style={{ gap: 0 }}>
             <Text fz={"1rem"} fw={800} c={"main"}>
               Pedidos em andamento
             </Text>
             <Paper
               shadow="xl"
               h={"100%"}
-              mah={"47.5vh"}
-              style={{ borderRadius: "10px", overflow: "hidden" }}
+              mah={"40vh"}
+              style={{ borderRadius: "10px", overflow: "auto" }}
             >
-              <Table.ScrollContainer minWidth={"100%"} mah={"47.5vh"}>
-                <Table striped>
+              <Table.ScrollContainer minWidth={"100%"} mah={"40vh"}>
+                <Table
+                  striped
+                  withTableBorder
+                  withColumnBorders
+                  highlightOnHover
+                >
                   <Table.Thead>
                     <Table.Tr>
                       <Table.Th>Colaborador</Table.Th>
@@ -119,14 +124,14 @@ function Ranking() {
                     <Group
                       w={"100%"}
                       justify="center"
-                      h={"37vh"}
+                      h={"30vh"}
                       align="center"
                     >
                       <NoData />
                     </Group>
                   )}
                 {productionLineIsLoading && (
-                  <Group w={"100%"} justify="center" h={"37vh"} align="center">
+                  <Group w={"100%"} justify="center" h={"30vh"} align="center">
                     <Loading />
                   </Group>
                 )}
@@ -134,18 +139,23 @@ function Ranking() {
             </Paper>
           </Stack>
 
-          <Stack h={"47.5vh"} style={{ gap: 0 }}>
+          <Stack h={"40vh"} style={{ gap: 0 }}>
             <Text fz={"1rem"} fw={800} c={"main"}>
               {`Pedidos finalizados - ${currentDate}`}
             </Text>
             <Paper
               shadow="xl"
               h={"100%"}
-              mah={"47.5vh"}
-              style={{ borderRadius: "10px", overflow: "hidden" }}
+              mah={"40vh"}
+              style={{ borderRadius: "10px", overflow: "auto" }}
             >
-              <Table.ScrollContainer minWidth={"100%"} mah={"47.5vh"}>
-                <Table striped>
+              <Table.ScrollContainer minWidth={"100%"} mah={"40vh"}>
+                <Table
+                  striped
+                  withTableBorder
+                  withColumnBorders
+                  highlightOnHover
+                >
                   <Table.Thead>
                     <Table.Tr>
                       <Table.Th>Pedido</Table.Th>
@@ -164,12 +174,12 @@ function Ranking() {
                   </Table.Tbody>
                 </Table>
                 {!tables?.finished?.length && !productionLineIsLoading && (
-                  <Group w={"100%"} justify="center" h={"37vh"} align="center">
+                  <Group w={"100%"} justify="center" h={"30vh"} align="center">
                     <NoData />
                   </Group>
                 )}
                 {productionLineIsLoading && (
-                  <Group w={"100%"} justify="center" h={"37vh"} align="center">
+                  <Group w={"100%"} justify="center" h={"30vh"} align="center">
                     <Loading />
                   </Group>
                 )}
@@ -177,18 +187,23 @@ function Ranking() {
             </Paper>
           </Stack>
 
-          <Stack h={"47.5vh"} style={{ gap: 0 }}>
+          <Stack h={"40vh"} style={{ gap: 0 }}>
             <Text fz={"1rem"} fw={800} c={"main"}>
               {`Pedidos entregues - ${currentDate}`}
             </Text>
             <Paper
               h={"100%"}
               shadow="xl"
-              mah={"47.5vh"}
-              style={{ borderRadius: "10px", overflow: "hidden" }}
+              mah={"40vh"}
+              style={{ borderRadius: "10px", overflow: "auto" }}
             >
-              <Table.ScrollContainer minWidth={"100%"} mah={"47.5vh"}>
-                <Table striped>
+              <Table.ScrollContainer minWidth={"100%"} mah={"40vh"}>
+                <Table
+                  striped
+                  withTableBorder
+                  withColumnBorders
+                  highlightOnHover
+                >
                   <Table.Thead>
                     <Table.Tr>
                       <Table.Th>Pedido</Table.Th>
@@ -209,12 +224,12 @@ function Ranking() {
                   </Table.Tbody>
                 </Table>
                 {!tables?.delivered?.length && !productionLineIsLoading && (
-                  <Group w={"100%"} justify="center" h={"37vh"} align="center">
+                  <Group w={"100%"} justify="center" h={"30vh"} align="center">
                     <NoData />
                   </Group>
                 )}
                 {productionLineIsLoading && (
-                  <Group w={"100%"} justify="center" h={"37vh"} align="center">
+                  <Group w={"100%"} justify="center" h={"30vh"} align="center">
                     <Loading />
                   </Group>
                 )}
@@ -224,8 +239,8 @@ function Ranking() {
         </SimpleGrid>
       </Stack>
 
-      <Stack h={"47.5vh"}>
-        <SimpleGrid cols={5} h={"40vh"}>
+      <Stack h={"50vh"}>
+        <SimpleGrid cols={5} h={"50vh"}>
           {rankings?.PLASTER?.length ? (
             <Paper shadow="xl" h={"100%"} p={"1rem"}>
               <BarChart data={rankings?.PLASTER} title="Gesso" />
@@ -313,7 +328,7 @@ function Ranking() {
       >
         {usersProductionData?.orders?.length ? (
           <Table.ScrollContainer minWidth={"100%"} mah={"50vh"} h={"50vh"}>
-            <Table striped>
+            <Table striped withTableBorder withColumnBorders highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>Pedido</Table.Th>

@@ -182,6 +182,7 @@ export default function ProductsDashboard() {
         />
         <Button
           radius={"xl"}
+          variant="light"
           leftSection={<UserPlus />}
           onClick={() => navigate("/add-product")}
         >
@@ -195,7 +196,7 @@ export default function ProductsDashboard() {
             <Accordion.Item key={index} value={category?.id?.toString()}>
               <Accordion.Control>
                 <Group justify="space-between">
-                  <Text fw={700}>{`Categoria: ${category?.category}`}</Text>
+                  <Text fw={700}>{`${category?.category}`}</Text>
                   <Text mr={"1rem"}>Clique para visualizar produtos</Text>
                 </Group>
               </Accordion.Control>
@@ -207,7 +208,12 @@ export default function ProductsDashboard() {
               >
                 {category?.products?.length ? (
                   <Table.ScrollContainer minWidth={"100%"}>
-                    <Table striped>
+                    <Table
+                      striped
+                      withTableBorder
+                      withColumnBorders
+                      highlightOnHover
+                    >
                       <Table.Thead>
                         <Table.Tr>
                           <Table.Th>Categoria</Table.Th>

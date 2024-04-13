@@ -14,7 +14,11 @@ import { Notifications } from "@mantine/notifications";
 const r = routes?.map((route) => ({
   path: route?.path,
   element: route?.isPrivate ? (
-    <AppShell pageTitle={route?.title ?? ""} returnButton={route?.returnButton}>
+    <AppShell
+      pageTitle={route?.title ?? ""}
+      returnButton={route?.returnButton}
+      fullScreen={route?.fullScreen}
+    >
       {route?.element}
     </AppShell>
   ) : (

@@ -17,7 +17,7 @@ const FinancialTable: React.FC<FinancialTableProps> = ({ clients }) => (
     >
       {Boolean(clients?.table?.length) && (
         <Table.ScrollContainer minWidth={"100%"} h={"59vh"} mah={"59vh"}>
-          <Table striped>
+          <Table striped withTableBorder withColumnBorders highlightOnHover>
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Cliente</Table.Th>

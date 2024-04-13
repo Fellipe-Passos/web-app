@@ -61,7 +61,7 @@ export default function Collections() {
   return (
     <Stack h={"100%"}>
       <Table.ScrollContainer minWidth={"100%"}>
-        <Table striped>
+        <Table striped withTableBorder withColumnBorders highlightOnHover>
           <Table.Thead>
             <Table.Th>Pedido</Table.Th>
             <Table.Th>Data de criação</Table.Th>

@@ -72,7 +72,7 @@ export default function WhatsAppDashboard(): JSX.Element {
 
       {data?.logs?.length && !getLogsLoading ? (
         <Table.ScrollContainer minWidth={"100%"}>
-          <Table striped>
+          <Table striped withTableBorder withColumnBorders highlightOnHover>
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Id</Table.Th>

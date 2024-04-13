@@ -429,7 +429,7 @@ export default function OrdersDashboard(): JSX.Element {
           />
         )}
         <Group>
-          <Button onClick={() => navigate("/new-order")}>
+          <Button variant="light" onClick={() => navigate("/new-order")}>
             Adicionar novo pedido
           </Button>
         </Group>
