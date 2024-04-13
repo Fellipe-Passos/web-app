@@ -121,9 +121,18 @@ export default function TransactionsDashboard(): JSX.Element {
       description,
       clientId: Number(clientId),
       type: type as unknown as TransactionsEnum,
-      discount: discount?.trim()?.length ? removeCurrencyMask(discount) : 0,
       orderId,
     };
+
+    if (discount?.trim()?.length) {
+      if (discount?.includes("R$")) {
+        dataToSend.discount = removeCurrencyMask(discount);
+      } else {
+        dataToSend.discount = Number(discount);
+      }
+    } else {
+      dataToSend.discount = 0;
+    }
 
     if (billingType)
       dataToSend.billingType = [
