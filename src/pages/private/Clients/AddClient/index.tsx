@@ -198,8 +198,6 @@ export default function AddClient() {
         email: form.values.email,
       };
 
-      console.log(dataToSend);
-
       updateMutate(dataToSend, {
         onSuccess() {
           notifications.show({
@@ -253,7 +251,9 @@ export default function AddClient() {
   };
 
   useEffect(() => {
-    if (!data?.zip) {
+    const client = data as any;
+
+    if (!client?.zip) {
       const zip = removeCPFMask(form.values.zip);
 
       if (zip?.trim()?.length === 8) {
