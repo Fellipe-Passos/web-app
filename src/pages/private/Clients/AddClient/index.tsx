@@ -44,34 +44,64 @@ export default function AddClient() {
 
   const { data } = useQuery("get-client", () => getClient(clientId as string), {
     enabled: Boolean(clientId),
-    onSuccess(data: any) {
-      if (clientId) {
-        form.setValues({
-          city: data?.city,
-          complement: data?.complement,
-          district: data?.district,
-          name: data?.name,
-          number: data?.number,
-          phone: data?.phone?.replace("55", ""),
-          cro: data?.cro ?? "",
-          state: data?.state,
-          street: data?.street,
-          zip: data?.zip,
-          CPF: data?.CPF,
-          email: data?.email,
-          clientType: data?.CPF
-            ? data?.CPF?.length === 11
-              ? "PF"
-              : "PJ"
-            : "PF",
-          orderCollection: Boolean(data?.orderCollection),
-          dateOfBirth: data?.dateOfBirth
-            ? (new Date(data?.dateOfBirth) as any)
-            : undefined,
-        });
-      }
-    },
+    // onSuccess(data: any) {
+    //   if (clientId) {
+    //     form.setValues({
+    //       city: data?.city,
+    //       complement: data?.complement,
+    //       district: data?.district,
+    //       name: data?.name,
+    //       number: data?.number,
+    //       phone: data?.phone?.replace("55", ""),
+    //       cro: data?.cro ?? "",
+    //       state: data?.state,
+    //       street: data?.street,
+    //       zip: data?.zip,
+    //       CPF: data?.CPF,
+    //       email: data?.email,
+    //       clientType: data?.CPF
+    //         ? data?.CPF?.length === 11
+    //           ? "PF"
+    //           : "PJ"
+    //         : "PF",
+    //       orderCollection: Boolean(data?.orderCollection),
+    //       dateOfBirth: data?.dateOfBirth
+    //         ? (new Date(data?.dateOfBirth) as any)
+    //         : undefined,
+    //     });
+    //   }
+    // },
   });
+
+  useEffect(() => {
+    if (clientId && data) {
+      const client = data as any;
+
+      form.setValues({
+        city: client?.city,
+        complement: client?.complement,
+        district: client?.district,
+        name: client?.name,
+        number: client?.number,
+        phone: client?.phone?.replace("55", ""),
+        cro: client?.cro ?? "",
+        state: client?.state,
+        street: client?.street,
+        zip: client?.zip,
+        CPF: client?.CPF,
+        email: client?.email,
+        clientType: client?.CPF
+          ? client?.CPF?.length === 11
+            ? "PF"
+            : "PJ"
+          : "PF",
+        orderCollection: Boolean(client?.orderCollection),
+        dateOfBirth: client?.dateOfBirth
+          ? (new Date(client?.dateOfBirth) as any)
+          : undefined,
+      });
+    }
+  }, [data]);
 
   const onSubmit = (): void => {
     const { hasErrors } = form.validate();
@@ -167,6 +197,8 @@ export default function AddClient() {
         CPF: removeCPFMask(form.values.CPF),
         email: form.values.email,
       };
+
+      console.log(dataToSend);
 
       updateMutate(dataToSend, {
         onSuccess() {
