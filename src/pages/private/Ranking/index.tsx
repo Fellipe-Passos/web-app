@@ -16,8 +16,12 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
 import { Eye } from "tabler-icons-react";
 import {
+  digitalRanking,
+  finishingRanking,
   getProductionLine,
-  getProductionLineAndRanking,
+  millingRanking,
+  plasterRanking,
+  readjustmentRanking,
 } from "./index.service";
 import { translateRole } from "../../../utils";
 import NoData from "../../../components/NoData";
@@ -31,10 +35,22 @@ function Ranking() {
 
   const currentDate = new Date()?.toLocaleDateString("pt-br");
 
-  const { data, isLoading: rankingIsLoading } = useQuery(
-    "productionLine-ranking",
-    getProductionLineAndRanking
-  );
+  const { data: plasterRankingData, isLoading: plasterRankingIsLoading } =
+    useQuery("plaster-ranking", plasterRanking);
+
+  const { data: digitalRankingData, isLoading: digitalRankingIsLoading } =
+    useQuery("digital-ranking", digitalRanking);
+
+  const { data: millingRankingData, isLoading: millingRankingIsLoading } =
+    useQuery("milling-ranking", millingRanking);
+
+  const { data: finishingRankingData, isLoading: finishingRankingIsLoading } =
+    useQuery("finishing-ranking", finishingRanking);
+
+  const {
+    data: readjustmentRankingData,
+    isLoading: readjustmentRankingIsLoading,
+  } = useQuery("readjustment-ranking", readjustmentRanking);
 
   const { data: productionLine, isLoading: productionLineIsLoading } = useQuery(
     "production-line",
@@ -44,7 +60,7 @@ function Ranking() {
   useEffect(() => {
     const interval = setInterval(() => {
       // Refetch das queries
-      queryClient.invalidateQueries("productionLine-ranking");
+      queryClient.invalidateQueries("plaster-ranking");
       queryClient.invalidateQueries("production-line");
 
       window.location.reload();
@@ -62,7 +78,6 @@ function Ranking() {
   // };
 
   const tables = productionLine?.tables;
-  const rankings = data?.rankings;
 
   return (
     <Stack h={"100%"} p={0} m={0}>
@@ -241,11 +256,11 @@ function Ranking() {
 
       <Stack h={"50vh"}>
         <SimpleGrid cols={5} h={"50vh"}>
-          {rankings?.PLASTER?.length ? (
+          {plasterRankingData?.length ? (
             <Paper shadow="xl" h={"100%"} p={"1rem"}>
-              <BarChart data={rankings?.PLASTER} title="Gesso" />
+              <BarChart data={plasterRankingData} title="Gesso" />
             </Paper>
-          ) : !rankings?.PLASTER?.length && !rankingIsLoading ? (
+          ) : !plasterRankingData?.length && !plasterRankingIsLoading ? (
             <Paper shadow="xl" h={"100%"}>
               <NoData />
             </Paper>
@@ -255,11 +270,11 @@ function Ranking() {
             </Paper>
           )}
 
-          {rankings?.DIGITAL?.length ? (
+          {digitalRankingData?.length ? (
             <Paper shadow="xl" h={"100%"} p={"1rem"}>
-              <BarChart data={rankings?.DIGITAL} title="Digital" />
+              <BarChart data={digitalRankingData} title="Digital" />
             </Paper>
-          ) : !rankings?.DIGITAL?.length && !rankingIsLoading ? (
+          ) : !digitalRankingData?.length && !digitalRankingIsLoading ? (
             <Paper shadow="xl" h={"100%"}>
               <NoData />
             </Paper>
@@ -269,11 +284,11 @@ function Ranking() {
             </Paper>
           )}
 
-          {rankings?.MILLING?.length ? (
+          {millingRankingData?.length ? (
             <Paper shadow="xl" h={"100%"} p={"1rem"}>
-              <BarChart data={rankings?.MILLING} title="Fresagem" />
+              <BarChart data={millingRankingData} title="Fresagem" />
             </Paper>
-          ) : !rankings?.MILLING?.length && !rankingIsLoading ? (
+          ) : !millingRankingData?.length && !millingRankingIsLoading ? (
             <Paper shadow="xl" h={"100%"}>
               <NoData />
             </Paper>
@@ -283,11 +298,11 @@ function Ranking() {
             </Paper>
           )}
 
-          {rankings?.FINISHING?.length ? (
+          {finishingRankingData?.length ? (
             <Paper shadow="xl" h={"100%"} p={"1rem"}>
-              <BarChart data={rankings?.FINISHING} title="Acabamento" />
+              <BarChart data={finishingRankingData} title="Acabamento" />
             </Paper>
-          ) : !rankings?.FINISHING?.length && !rankingIsLoading ? (
+          ) : !finishingRankingData?.length && !finishingRankingIsLoading ? (
             <Paper shadow="xl" h={"100%"}>
               <NoData />
             </Paper>
@@ -297,11 +312,12 @@ function Ranking() {
             </Paper>
           )}
 
-          {rankings?.READJUSTMENT?.length ? (
+          {readjustmentRankingData?.length ? (
             <Paper shadow="xl" h={"100%"} p={"1rem"}>
-              <BarChart data={rankings?.READJUSTMENT} title="Reajuste" />
+              <BarChart data={readjustmentRankingData} title="Reajuste" />
             </Paper>
-          ) : !rankings?.READJUSTMENT?.length && !rankingIsLoading ? (
+          ) : !readjustmentRankingData?.length &&
+            !readjustmentRankingIsLoading ? (
             <Paper shadow="xl" h={"100%"}>
               <NoData />
             </Paper>
