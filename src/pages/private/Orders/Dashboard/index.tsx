@@ -358,7 +358,7 @@ export default function OrdersDashboard(): JSX.Element {
                   </ActionIcon>
                 </Tooltip>
               )}
-              {badge?.text === "Aguardando pagamento" &&
+              {["Aguardando pagamento", "Pago"]?.includes(badge?.text) &&
                 activeTab === "FOR_DELIVERY" && (
                   <Tooltip label="Finalizar pedido">
                     <ActionIcon
