@@ -105,13 +105,13 @@ export default function TransactionsDashboard(): JSX.Element {
       description,
       type,
       value,
-      discount,
       billingType,
       dueDate,
       installmentCount,
       installmentValue,
       orderId,
       emitCollection,
+      discountInMoney,
     } = form.values;
 
     const dataToSend: any = {
@@ -124,11 +124,11 @@ export default function TransactionsDashboard(): JSX.Element {
       orderId,
     };
 
-    if (discount?.trim()?.length) {
-      if (discount?.includes("R$")) {
-        dataToSend.discount = removeCurrencyMask(discount);
+    if (discountInMoney?.trim()?.length) {
+      if (discountInMoney?.includes("R$")) {
+        dataToSend.discount = removeCurrencyMask(discountInMoney);
       } else {
-        dataToSend.discount = Number(discount);
+        dataToSend.discount = Number(discountInMoney);
       }
     } else {
       dataToSend.discount = 0;
