@@ -210,21 +210,23 @@ export default function TransactionsDashboard(): JSX.Element {
   );
 
   useEffect(() => {
-    if (Array.isArray(form.values?.orderId) && ordersData?.orders) {
-      let totalValue = 0;
+    if (form.values.type === TransactionsEnum.CREDIT) {
+      if (Array.isArray(form.values?.orderId) && ordersData?.orders) {
+        let totalValue = 0;
 
-      form.values.orderId?.forEach((orderId) => {
-        const selectedOrder = ordersData.orders.find(
-          (order) => Number(order.id) === Number(orderId)
-        );
-        if (selectedOrder) {
-          totalValue += Number(selectedOrder.price);
-        }
-      });
+        form.values.orderId?.forEach((orderId) => {
+          const selectedOrder = ordersData.orders.find(
+            (order) => Number(order.id) === Number(orderId)
+          );
+          if (selectedOrder) {
+            totalValue += Number(selectedOrder.price);
+          }
+        });
 
-      form.setFieldValue("value", `${totalValue}`);
+        form.setFieldValue("value", `${totalValue}`);
+      }
     }
-  }, [form.values.orderId, ordersData?.orders]);
+  }, [form.values.orderId]);
 
   useEffect(() => {
     const { value, discountInMoney } = form.values;
@@ -263,24 +265,16 @@ export default function TransactionsDashboard(): JSX.Element {
           withAsterisk
           {...form.getInputProps("clientId")}
         />
-        {form.values.type === TransactionsEnum.CREDIT && (
-          <MultiSelect
-            label="Pedido"
-            data={getOrdersToSelect(filteredOrders)}
-            searchable
-            clearable
-            withAsterisk
-            {...form.getInputProps("orderId")}
-          />
-          // <Select
-          //   label="Pedido"
-          //   data={getOrdersToSelect(filteredOrders)}
-          //   searchable
-          //   clearable
-          //   withAsterisk
-          //   {...form.getInputProps("orderId")}
-          // />
-        )}
+
+        <MultiSelect
+          label="Pedido"
+          data={getOrdersToSelect(filteredOrders)}
+          searchable
+          clearable
+          withAsterisk
+          {...form.getInputProps("orderId")}
+        />
+
         <SimpleGrid cols={form.values.type === TransactionsEnum.DEBT ? 1 : 3}>
           <NumericFormat
             thousandSeparator="."

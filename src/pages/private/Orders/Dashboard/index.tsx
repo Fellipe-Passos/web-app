@@ -379,24 +379,26 @@ export default function OrdersDashboard(): JSX.Element {
                     </ActionIcon>
                   </Tooltip>
                 )}
-              {[UserRoles.Ceo, UserRoles.Root]?.includes(
+              {[UserRoles.Ceo, UserRoles.Root, UserRoles.Manager]?.includes(
                 userRole as UserRoles
-              ) && (
-                <Tooltip label="Deletar pedido">
-                  <ActionIcon
-                    color="red"
-                    variant="filled"
-                    radius={"xl"}
-                    size={"md"}
-                    loading={deleteOrderIsLoading}
-                    onClick={() => {
-                      deleteOrderMutate({ orderId: order?.id });
-                    }}
-                  >
-                    <Trash />
-                  </ActionIcon>
-                </Tooltip>
-              )}
+              ) &&
+                [UserRoles.Manager]?.includes(userRole as UserRoles) &&
+                activeTab !== "FOR_DELIVERY" && (
+                  <Tooltip label="Deletar pedido">
+                    <ActionIcon
+                      color="red"
+                      variant="filled"
+                      radius={"xl"}
+                      size={"md"}
+                      loading={deleteOrderIsLoading}
+                      onClick={() => {
+                        deleteOrderMutate({ orderId: order?.id });
+                      }}
+                    >
+                      <Trash />
+                    </ActionIcon>
+                  </Tooltip>
+                )}
             </Group>
           </Table.Td>
         </Table.Tr>
@@ -428,11 +430,19 @@ export default function OrdersDashboard(): JSX.Element {
             }}
           />
         )}
-        <Group>
-          <Button variant="light" onClick={() => navigate("/new-order")}>
-            Adicionar novo pedido
-          </Button>
-        </Group>
+        {[
+          UserRoles.ScreeningAdministration,
+          UserRoles.Ceo,
+          UserRoles.Root,
+        ]?.includes(userRole as UserRoles) ? (
+          <Group>
+            <Button variant="light" onClick={() => navigate("/new-order")}>
+              Adicionar novo pedido
+            </Button>
+          </Group>
+        ) : (
+          <div />
+        )}
       </Group>
       {activeTab === "ALL" && (
         <Radio.Group
